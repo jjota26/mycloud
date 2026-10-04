@@ -227,6 +227,164 @@
             -webkit-user-drag: none;
             pointer-events: none; /* Permite que o toque no ecrã passe diretamente para o palco de deslize */
         }
+        #gallery-video {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.95);
+            z-index: 20;
+        }
+
+        /* Swipe Up Hint & Metadata Bottom Sheet in Gallery */
+        .gallery-swipe-hint {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.78);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #94a3b8;
+            padding: 5px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            z-index: 24;
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .gallery-swipe-hint:hover {
+            background: rgba(2, 132, 199, 0.85);
+            color: #fff;
+            border-color: #38bdf8;
+            transform: translateX(-50%) translateY(-2px);
+        }
+        .swipe-hint-arrow {
+            font-size: 10px;
+            color: #38bdf8;
+            animation: bounceUp 1.5s infinite;
+        }
+        @keyframes bounceUp {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .gallery-details-sheet {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 680px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid #334155;
+            border-left: 1px solid #334155;
+            border-right: 1px solid #334155;
+            border-radius: 22px 22px 0 0;
+            box-shadow: 0 -12px 45px rgba(0, 0, 0, 0.85);
+            z-index: 50;
+            max-height: 82vh;
+            max-height: 82dvh;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(105%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .gallery-details-sheet.open {
+            transform: translateY(0);
+        }
+        .sheet-handle-bar {
+            width: 100%;
+            padding: 10px 0 6px 0;
+            display: flex;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .sheet-handle-pill {
+            width: 44px;
+            height: 5px;
+            border-radius: 3px;
+            background: #475569;
+            transition: background 0.2s;
+        }
+        .sheet-handle-bar:hover .sheet-handle-pill {
+            background: #38bdf8;
+        }
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 18px 12px 18px;
+            border-bottom: 1px solid #1e293b;
+        }
+        .sheet-close-btn {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            font-size: 14px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sheet-close-btn:hover {
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
+        }
+        .sheet-body {
+            overflow-y: auto;
+            padding: 16px 18px 24px 18px;
+            flex: 1;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+        .meta-group {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+        .meta-group-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #38bdf8;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .meta-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .meta-item:last-child {
+            border-bottom: none;
+        }
+        .meta-label { color: #94a3b8; }
+        .meta-value { font-weight: 500; color: #f8fafc; text-align: right; word-break: break-all; }
 
         .gallery-strip {
             display: flex;
@@ -836,6 +994,7 @@
         </div>
         <div class="gallery-counter" id="gallery-counter">1 / 1</div>
         <div class="gallery-actions">
+            <button class="btn btn-secondary btn-sm" id="gallery-btn-info" onclick="toggleGalleryDetails()" title="Ver Metadados &amp; Mapa (ou desliza para cima)">ℹ️ <span class="gallery-btn-text-hide">Detalhes</span></button>
             <a id="gallery-btn-download" href="#" class="btn btn-secondary btn-sm" download title="Descarregar ficheiro original">📥 <span class="gallery-btn-text-hide">Descarregar</span></a>
             <button class="btn btn-secondary btn-sm gallery-btn-text-hide" onclick="toggleGalleryFullscreen()" title="Ecrã inteiro">⛶</button>
             <button class="btn btn-danger btn-sm" onclick="closePhotoGallery()" style="font-size: 18px; padding: 6px 14px; border-radius: 8px; font-weight: bold;" title="Fechar">✕</button>
@@ -846,12 +1005,35 @@
         <button class="gallery-nav-btn gallery-nav-prev" id="gallery-prev-btn" onclick="slidePhoto('prev')">‹</button>
         <div class="gallery-img-wrapper" id="gallery-img-wrapper">
             <img id="gallery-img" src="" alt="Foto" draggable="false">
+            <video id="gallery-video" controls playsinline style="display: none;"></video>
         </div>
         <button class="gallery-nav-btn gallery-nav-next" id="gallery-next-btn" onclick="slidePhoto('next')">›</button>
+
+        <!-- Pista visual de deslize para cima (Swipe Up Hint) -->
+        <div class="gallery-swipe-hint" id="gallery-swipe-hint" onclick="openGalleryDetails()">
+            <span class="swipe-hint-arrow">▲</span> Deslizar para cima para ver detalhes &amp; mapa
+        </div>
     </div>
 
     <div class="gallery-strip" id="gallery-strip">
         <!-- Miniaturas em fita horizontal geradas pelo JavaScript -->
+    </div>
+
+    <!-- BOTTOM SHEET: DETALHES, METADADOS & MAPA (DESLIZA DE BAIXO PARA CIMA) -->
+    <div id="gallery-details-sheet" class="gallery-details-sheet">
+        <div class="sheet-handle-bar" onclick="toggleGalleryDetails()">
+            <div class="sheet-handle-pill"></div>
+        </div>
+        <div class="sheet-header">
+            <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; max-width: 80%;">
+                <span style="font-size: 16px;">ℹ️</span>
+                <strong style="color: #f8fafc; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="sheet-header-filename">Detalhes do Ficheiro</strong>
+            </div>
+            <button class="sheet-close-btn" onclick="closeGalleryDetails()" title="Fechar detalhes">✕</button>
+        </div>
+        <div class="sheet-body" id="gallery-details-content">
+            <div style="text-align: center; color: #94a3b8; padding: 24px;">A carregar metadados...</div>
+        </div>
     </div>
 </div>
 
@@ -1428,14 +1610,14 @@
             renderBreadcrumbs(data.current_path);
 
             currentFolderItems = data.items || [];
-            currentGalleryPhotos = currentFolderItems.filter(item => !item.is_dir && isImageFile(item.name));
+            currentGalleryPhotos = currentFolderItems.filter(item => !item.is_dir && (isImageFile(item.name) || isVideoFile(item.name)));
 
             // Atualizar sumário
             const summaryEl = document.getElementById('files-summary-text');
             if (summaryEl) {
                 const totalItems = currentFolderItems.length;
-                const photoCount = currentGalleryPhotos.length;
-                summaryEl.textContent = `${totalItems} item(ns)${photoCount > 0 ? ` (${photoCount} fotografia(s))` : ''}`;
+                const mediaCount = currentGalleryPhotos.length;
+                summaryEl.textContent = `${totalItems} item(ns)${mediaCount > 0 ? ` (${mediaCount} multimédia)` : ''}`;
             }
 
             // Aplicar modo atual guardado
@@ -1486,6 +1668,7 @@
                 setupItemDragAndTouch(tr, item.name, true);
             } else {
                 const isImg = isImageFile(item.name);
+                const isVid = isVideoFile(item.name);
                 const viewUrl = getFileStreamUrl(item.name, true);
                 const downloadUrl = getFileStreamUrl(item.name, false);
                 const sizeStr = item.size_mb >= 1 ? `${item.size_mb} MB` : `${item.size_kb} KB`;
@@ -1498,6 +1681,12 @@
                             <img class="file-thumb-img" src="${viewUrl}" loading="lazy" alt="${item.name}">
                         </div>
                     `;
+                } else if (isVid) {
+                    thumbHtml = `
+                        <div class="file-thumb-container" title="Toque para abrir na Galeria">
+                            <span class="file-icon">🎬</span>
+                        </div>
+                    `;
                 } else {
                     thumbHtml = `
                         <div class="file-thumb-container" title="Toque para pré-visualizar">
@@ -1507,11 +1696,11 @@
                 }
 
                 tr.innerHTML = `
-                    <td onclick="${isImg ? `openPhotoGallery('${cleanName}')` : `previewFile('${cleanName}')`}" style="cursor: pointer;">
+                    <td onclick="${isImg || isVid ? `openPhotoGallery('${cleanName}')` : `previewFile('${cleanName}')`}" style="cursor: pointer;">
                         <div style="display: flex; align-items: center;">
                             ${thumbHtml}
                             <div>
-                                <strong class="file-name-click" style="${isImg ? 'color: #38bdf8;' : ''}">${item.name}</strong>
+                                <strong class="file-name-click" style="${isImg || isVid ? 'color: #38bdf8;' : ''}">${item.name}</strong>
                             </div>
                         </div>
                     </td>
@@ -1562,6 +1751,7 @@
                 setupItemDragAndTouch(card, item.name, true);
             } else {
                 const isImg = isImageFile(item.name);
+                const isVid = isVideoFile(item.name);
                 const viewUrl = getFileStreamUrl(item.name, true);
                 const downloadUrl = getFileStreamUrl(item.name, false);
                 const sizeStr = item.size_mb >= 1 ? `${item.size_mb} MB` : `${item.size_kb} KB`;
@@ -1572,6 +1762,13 @@
                     thumbHtml = `
                         <div class="grid-thumb-box" style="cursor: pointer;">
                             <img class="grid-thumb-img" src="${viewUrl}" loading="lazy" alt="${item.name}">
+                        </div>
+                    `;
+                } else if (isVid) {
+                    thumbHtml = `
+                        <div class="grid-thumb-box" style="cursor: pointer; position: relative;">
+                            <video src="${viewUrl}#t=0.5" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;"></video>
+                            <span style="position: absolute; font-size: 24px; background: rgba(0,0,0,0.65); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.3);">▶️</span>
                         </div>
                     `;
                 } else {
@@ -1585,7 +1782,7 @@
                 card.innerHTML = `
                     ${thumbHtml}
                     <div class="grid-info">
-                        <div class="grid-name" title="${item.name}" style="${isImg ? 'color: #38bdf8;' : ''}">${item.name}</div>
+                        <div class="grid-name" title="${item.name}" style="${isImg || isVid ? 'color: #38bdf8;' : ''}">${item.name}</div>
                         <div class="grid-meta"><span>${sizeStr}</span><span>${dateStr}</span></div>
                         <div class="grid-actions">
                             <button class="btn btn-secondary btn-sm" onclick="previewFile('${cleanName}')" style="color: #38bdf8;">👁️ Ver</button>
@@ -1597,7 +1794,7 @@
                 card.style.cursor = 'pointer';
                 card.onclick = (e) => {
                     if (e.target.closest('button, a, input')) return;
-                    if (isImg) {
+                    if (isImg || isVid) {
                         openPhotoGallery(cleanName);
                     } else {
                         previewFile(cleanName);
@@ -1876,42 +2073,54 @@
     function renderCurrentGalleryPhoto(slideDir = null) {
         if (!currentGalleryPhotos || currentGalleryPhotos.length === 0) return;
         const photo = currentGalleryPhotos[currentGalleryIndex];
+        const isVid = isVideoFile(photo.name);
         const img = document.getElementById('gallery-img');
+        const video = document.getElementById('gallery-video');
 
         document.getElementById('gallery-title').textContent = photo.name;
         const sizeStr = photo.size_mb >= 1 ? `${photo.size_mb} MB` : (photo.size_kb ? `${photo.size_kb} KB` : '');
         const dateStr = photo.modified ? new Date(photo.modified).toLocaleDateString('pt-PT') : '';
-        document.getElementById('gallery-meta').textContent = [sizeStr, dateStr].filter(Boolean).join(' • ');
+        document.getElementById('gallery-meta').textContent = [isVid ? '🎬 Vídeo' : '📸 Foto', sizeStr, dateStr].filter(Boolean).join(' • ');
         document.getElementById('gallery-counter').textContent = `${currentGalleryIndex + 1} / ${currentGalleryPhotos.length}`;
 
         const dlBtn = document.getElementById('gallery-btn-download');
         dlBtn.href = getFileStreamUrl(photo.name, false);
         dlBtn.download = photo.name;
 
-        const photoUrl = getFileStreamUrl(photo.name, true);
+        const mediaUrl = getFileStreamUrl(photo.name, true);
 
-        if (slideDir) {
-            // Efeito suave de transição deslizante
-            img.style.transition = 'transform 0.15s ease-out, opacity 0.15s ease-out';
-            img.style.transform = slideDir === 'next' ? 'translateX(-60px)' : 'translateX(60px)';
-            img.style.opacity = '0';
-            setTimeout(() => {
-                img.src = photoUrl;
-                img.style.transition = 'none';
-                img.style.transform = slideDir === 'next' ? 'translateX(60px)' : 'translateX(-60px)';
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        img.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease-out';
-                        img.style.transform = 'translateX(0px)';
-                        img.style.opacity = '1';
-                    });
-                });
-            }, 100);
+        if (isVid) {
+            img.style.display = 'none';
+            video.style.display = 'block';
+            video.src = mediaUrl;
         } else {
-            img.style.transition = 'opacity 0.2s ease';
-            img.style.transform = 'translateX(0px)';
-            img.src = photoUrl;
-            img.style.opacity = '1';
+            video.style.display = 'none';
+            try { video.pause(); } catch(e) {}
+            img.style.display = 'block';
+
+            if (slideDir) {
+                // Efeito suave de transição deslizante
+                img.style.transition = 'transform 0.15s ease-out, opacity 0.15s ease-out';
+                img.style.transform = slideDir === 'next' ? 'translateX(-60px)' : 'translateX(60px)';
+                img.style.opacity = '0';
+                setTimeout(() => {
+                    img.src = mediaUrl;
+                    img.style.transition = 'none';
+                    img.style.transform = slideDir === 'next' ? 'translateX(60px)' : 'translateX(-60px)';
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            img.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease-out';
+                            img.style.transform = 'translateX(0px)';
+                            img.style.opacity = '1';
+                        });
+                    });
+                }, 100);
+            } else {
+                img.style.transition = 'opacity 0.2s ease';
+                img.style.transform = 'translateX(0px)';
+                img.src = mediaUrl;
+                img.style.opacity = '1';
+            }
         }
 
         // Atualizar miniatura ativa na fita inferior
@@ -1923,13 +2132,21 @@
                 t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
         });
+
+        // Se o painel de metadados estiver aberto, atualizar imediatamente para a nova foto/vídeo
+        const sheet = document.getElementById('gallery-details-sheet');
+        if (sheet && sheet.classList.contains('open')) {
+            loadCurrentMediaMetadata();
+        }
     }
 
     function slidePhoto(dir) {
         if (!currentGalleryPhotos || currentGalleryPhotos.length <= 1) {
             const img = document.getElementById('gallery-img');
-            img.style.transform = 'translateX(0px)';
-            img.style.opacity = '1';
+            if (img) {
+                img.style.transform = 'translateX(0px)';
+                img.style.opacity = '1';
+            }
             return;
         }
         if (dir === 'next') {
@@ -1948,6 +2165,12 @@
     }
 
     function closePhotoGallery() {
+        closeGalleryDetails();
+        const video = document.getElementById('gallery-video');
+        if (video) {
+            try { video.pause(); } catch(e) {}
+            video.src = '';
+        }
         document.getElementById('modal-gallery').classList.remove('active');
         if (document.fullscreenElement) {
             document.exitFullscreen().catch(() => {});
@@ -1969,26 +2192,216 @@
         }
     }
 
-    // Gesto de deslizar com o dedo (Touch Swipe para telemóveis)
+    // ==========================================
+    // METADADOS & MAPA GPS NA GALERIA (SWIPE UP / DESLIZAR PARA CIMA)
+    // ==========================================
+    function toggleGalleryDetails() {
+        const sheet = document.getElementById('gallery-details-sheet');
+        if (sheet.classList.contains('open')) {
+            closeGalleryDetails();
+        } else {
+            openGalleryDetails();
+        }
+    }
+
+    function closeGalleryDetails() {
+        const sheet = document.getElementById('gallery-details-sheet');
+        if (sheet) sheet.classList.remove('open');
+    }
+
+    async function openGalleryDetails() {
+        const sheet = document.getElementById('gallery-details-sheet');
+        if (!sheet) return;
+        sheet.classList.add('open');
+        await loadCurrentMediaMetadata();
+    }
+
+    async function loadCurrentMediaMetadata() {
+        if (!currentGalleryPhotos || currentGalleryPhotos.length === 0) return;
+        const currentItem = currentGalleryPhotos[currentGalleryIndex];
+        const contentBox = document.getElementById('gallery-details-content');
+        const titleEl = document.getElementById('sheet-header-filename');
+        if (titleEl) titleEl.textContent = currentItem.name;
+
+        contentBox.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; gap: 10px; color: #94a3b8;">
+                <div style="width: 24px; height: 24px; border: 3px solid #334155; border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <span style="font-size: 13px;">A carregar metadados e localização...</span>
+            </div>
+        `;
+
+        try {
+            const targetParam = inspectingUser ? `&target_user=${encodeURIComponent(inspectingUser.username)}` : '';
+            const pathParam = currentSubPath ? `&path=${encodeURIComponent(currentSubPath)}` : '';
+            const res = await fetch(`/api/media-metadata?type=${currentFolderType}${pathParam}&filename=${encodeURIComponent(currentItem.name)}&token=${encodeURIComponent(authToken)}${targetParam}`);
+            if (!res.ok) {
+                throw new Error('Não foi possível obter metadados');
+            }
+            const meta = await res.json();
+            renderMetadataInSheet(meta, currentItem);
+        } catch (e) {
+            contentBox.innerHTML = `
+                <div class="meta-group" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3);">
+                    <div class="meta-group-title" style="color: #ef4444;">⚠️ Metadados Não Disponíveis</div>
+                    <p style="color: #cbd5e1; font-size: 12px; margin-top: 4px;">
+                        Não foi possível carregar os metadados deste ficheiro. Detalhe: ${e.message}
+                    </p>
+                </div>
+            `;
+        }
+    }
+
+    function renderMetadataInSheet(meta, currentItem) {
+        const contentBox = document.getElementById('gallery-details-content');
+        let html = '';
+
+        // 1. Grupo Geral: Data, Resolução e Ficheiro
+        const dateDisplay = meta.dateFormatted || (currentItem.modified ? new Date(currentItem.modified).toLocaleString('pt-PT') : '--');
+        const resolutionDisplay = (meta.width && meta.height) 
+            ? `${meta.width} × ${meta.height}${meta.megapixels ? ` (${meta.megapixels})` : ''}` 
+            : '--';
+
+        html += `
+            <div class="meta-group">
+                <div class="meta-group-title">📅 Data &amp; Ficheiro</div>
+                <div class="meta-item">
+                    <span class="meta-label">Data da Captura</span>
+                    <span class="meta-value">${dateDisplay}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Nome do Ficheiro</span>
+                    <span class="meta-value">${meta.filename || currentItem.name}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Resolução / Dimensões</span>
+                    <span class="meta-value">${resolutionDisplay}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Tamanho no Disco Z:</span>
+                    <span class="meta-value">${meta.sizeFormatted || '--'}</span>
+                </div>
+            </div>
+        `;
+
+        // 2. Grupo Câmera / Dispositivo (se disponível)
+        if (meta.make || meta.model || meta.fNumber || meta.exposure || meta.iso || meta.focalLength) {
+            const deviceName = [meta.make, meta.model].filter(Boolean).join(' ');
+            const lensSpecs = [meta.fNumber, meta.exposure, meta.iso, meta.focalLength].filter(Boolean).join(' • ');
+
+            html += `
+                <div class="meta-group">
+                    <div class="meta-group-title">📸 Equipamento &amp; Definições</div>
+                    ${deviceName ? `
+                    <div class="meta-item">
+                        <span class="meta-label">Câmara / Dispositivo</span>
+                        <span class="meta-value" style="color: #38bdf8;">${deviceName}</span>
+                    </div>` : ''}
+                    ${lensSpecs ? `
+                    <div class="meta-item">
+                        <span class="meta-label">Parâmetros de Disparo</span>
+                        <span class="meta-value">${lensSpecs}</span>
+                    </div>` : ''}
+                </div>
+            `;
+        }
+
+        // 3. Se for Captura de Ecrã (Screenshot)
+        if (meta.isScreenshot) {
+            html += `
+                <div class="meta-group" style="background: rgba(2, 132, 199, 0.08); border-color: rgba(2, 132, 199, 0.25);">
+                    <div class="meta-group-title" style="color: #38bdf8;">📱 Captura de Ecrã (Screenshot)</div>
+                    <p style="font-size: 12px; color: #94a3b8; margin-top: 4px; line-height: 1.4;">
+                        Este ficheiro foi identificado como uma captura de ecrã do dispositivo. Não possui informações de lentes nem registo de coordenadas geográficas (GPS).
+                    </p>
+                </div>
+            `;
+        }
+
+        // 4. Se NÃO tiver metadados EXIF/GPS nem for captura de ecrã
+        if (!meta.hasMetadata && !meta.isScreenshot) {
+            html += `
+                <div class="meta-group" style="background: rgba(148, 163, 184, 0.06); border-color: #334155;">
+                    <div class="meta-group-title" style="color: #94a3b8;">ℹ️ Metadados Não Disponíveis</div>
+                    <p style="font-size: 12px; color: #94a3b8; margin-top: 4px; line-height: 1.4;">
+                        Este ficheiro não possui metadados EXIF de câmara ou localização geográfica (GPS) registados no ficheiro.
+                    </p>
+                </div>
+            `;
+        }
+
+        // 5. Grupo Localização & Mapa GPS (se tiver coordenadas)
+        if (meta.gps && meta.gps.latitude && meta.gps.longitude) {
+            const lat = meta.gps.latitude;
+            const lon = meta.gps.longitude;
+            const bboxLonMin = (lon - 0.008).toFixed(6);
+            const bboxLatMin = (lat - 0.005).toFixed(6);
+            const bboxLonMax = (lon + 0.008).toFixed(6);
+            const bboxLatMax = (lat + 0.005).toFixed(6);
+            const osmEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bboxLonMin}%2C${bboxLatMin}%2C${bboxLonMax}%2C${bboxLatMax}&layer=mapnik&marker=${lat}%2C${lon}`;
+            const gMapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+            const appleMapsUrl = `https://maps.apple.com/?q=${lat},${lon}`;
+
+            html += `
+                <div class="meta-group">
+                    <div class="meta-group-title">📍 Localização Exata da Captura (GPS)</div>
+                    <div class="meta-item">
+                        <span class="meta-label">Coordenadas</span>
+                        <span class="meta-value" style="color: #38bdf8; font-family: monospace;">${meta.gps.formatted || (lat + ', ' + lon)}</span>
+                    </div>
+                    ${meta.gps.altitude ? `
+                    <div class="meta-item">
+                        <span class="meta-label">Altitude</span>
+                        <span class="meta-value">${meta.gps.altitude} metros</span>
+                    </div>` : ''}
+
+                    <!-- Mapa Interativo OpenStreetMap com Marcador -->
+                    <div style="margin-top: 12px; border-radius: 12px; overflow: hidden; height: 230px; background: #020617; border: 1px solid #334155; position: relative;">
+                        <iframe 
+                            src="${osmEmbedUrl}" 
+                            style="width: 100%; height: 100%; border: none;" 
+                            loading="lazy" 
+                            title="Mapa da Localização">
+                        </iframe>
+                    </div>
+
+                    <!-- Botões de Abertura Direta nos Mapas -->
+                    <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                        <a href="${gMapsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="flex: 1; min-width: 140px; text-decoration: none; justify-content: center; background: #1e293b;">
+                            🗺️ Abrir no Google Maps
+                        </a>
+                        <a href="${appleMapsUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="flex: 1; min-width: 140px; text-decoration: none; justify-content: center; background: #1e293b;">
+                            🍎 Abrir no Apple Maps
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        contentBox.innerHTML = html;
+    }
+
+    // Gesto de deslizar com o dedo (Touch Swipe Horizontal e Vertical para Telemóveis)
     (function initGalleryTouchSwipe() {
         const stage = document.getElementById('gallery-stage');
         if (!stage) return;
         let startX = 0;
         let startY = 0;
         let deltaX = 0;
+        let deltaY = 0;
         let isTouching = false;
         let touchStartTime = 0;
 
         stage.addEventListener('touchstart', e => {
             if (e.touches.length === 1) {
-                if (e.target.closest('button')) return;
+                if (e.target.closest('button, a, input, iframe')) return;
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 deltaX = 0;
+                deltaY = 0;
                 isTouching = true;
                 touchStartTime = Date.now();
                 const img = document.getElementById('gallery-img');
-                img.style.transition = 'none';
+                if (img) img.style.transition = 'none';
             }
         }, { passive: true });
 
@@ -1997,15 +2410,20 @@
             const currentX = e.touches[0].clientX;
             const currentY = e.touches[0].clientY;
             deltaX = currentX - startX;
-            const deltaY = currentY - startY;
+            deltaY = currentY - startY;
 
-            // Se o movimento for predominantemente horizontal, prevenir o comportamento padrão do browser (swipe back / navigation)
+            // Se for movimento horizontal -> deslizar foto para o lado
             if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 8) {
                 e.preventDefault();
                 const img = document.getElementById('gallery-img');
-                img.style.transform = `translateX(${deltaX}px)`;
-                const opacity = Math.max(0.4, 1 - Math.abs(deltaX) / (window.innerWidth * 1.2));
-                img.style.opacity = opacity.toString();
+                if (img && img.style.display !== 'none') {
+                    img.style.transform = `translateX(${deltaX}px)`;
+                    const opacity = Math.max(0.4, 1 - Math.abs(deltaX) / (window.innerWidth * 1.2));
+                    img.style.opacity = opacity.toString();
+                }
+            } else if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY < -15) {
+                // Se for movimento vertical para CIMA (deslizar a foto para cima) -> abrir folha de metadados!
+                e.preventDefault();
             }
         }, { passive: false });
 
@@ -2013,13 +2431,32 @@
             if (!isTouching) return;
             isTouching = false;
             const img = document.getElementById('gallery-img');
-            img.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease';
+            if (img) {
+                img.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease';
+            }
 
             const elapsed = Date.now() - touchStartTime;
-            const velocity = Math.abs(deltaX) / Math.max(1, elapsed);
 
-            // Toque rápido nos lados para avançar/recuar
-            if (Math.abs(deltaX) < 12 && elapsed < 250) {
+            // 1. Se deslizou para CIMA (deltaY < -40) -> ABRIR METADADOS E MAPA!
+            if (deltaY < -40 && Math.abs(deltaY) > Math.abs(deltaX)) {
+                if (img) {
+                    img.style.transform = 'translateX(0px)';
+                    img.style.opacity = '1';
+                }
+                openGalleryDetails();
+                return;
+            }
+
+            // 2. Se a folha de detalhes estiver aberta e deslizou para baixo -> fechar folha
+            const sheet = document.getElementById('gallery-details-sheet');
+            if (sheet && sheet.classList.contains('open') && deltaY > 40) {
+                closeGalleryDetails();
+                return;
+            }
+
+            // 3. Toque rápido nos cantos ou deslize horizontal (próxima / anterior)
+            const velocity = Math.abs(deltaX) / Math.max(1, elapsed);
+            if (Math.abs(deltaX) < 12 && Math.abs(deltaY) < 12 && elapsed < 250) {
                 const stageRect = stage.getBoundingClientRect();
                 const clickX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : startX;
                 const relX = clickX - stageRect.left;
@@ -2032,13 +2469,12 @@
                 }
             }
 
-            // Deslizar para próxima / anterior
             const swipeThreshold = 35;
             if (deltaX < -swipeThreshold || (velocity > 0.35 && deltaX < -15)) {
                 slidePhoto('next');
             } else if (deltaX > swipeThreshold || (velocity > 0.35 && deltaX > 15)) {
                 slidePhoto('prev');
-            } else {
+            } else if (img) {
                 img.style.transform = 'translateX(0px)';
                 img.style.opacity = '1';
             }
@@ -2048,19 +2484,30 @@
         stage.addEventListener('touchcancel', finishSwipe);
     })();
 
-    // Atalhos de Teclado (Setas Esquerda / Direita e ESC)
+    // Atalhos de Teclado (Setas Esquerda / Direita, Cima / Baixo e ESC)
     window.addEventListener('keydown', e => {
         const gal = document.getElementById('modal-gallery');
         if (gal && gal.classList.contains('active')) {
+            const sheet = document.getElementById('gallery-details-sheet');
             if (e.key === 'ArrowRight' || e.key === ' ') {
                 e.preventDefault();
                 slidePhoto('next');
             } else if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 slidePhoto('prev');
+            } else if (e.key === 'ArrowUp' || e.key === 'i' || e.key === 'I') {
+                e.preventDefault();
+                openGalleryDetails();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                closeGalleryDetails();
             } else if (e.key === 'Escape') {
                 e.preventDefault();
-                closePhotoGallery();
+                if (sheet && sheet.classList.contains('open')) {
+                    closeGalleryDetails();
+                } else {
+                    closePhotoGallery();
+                }
             }
         }
     });

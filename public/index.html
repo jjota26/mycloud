@@ -1,0 +1,2364 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centauro - Nuvem &amp; Alojamento (Disco Z:\ 1 TB)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        /* Auth Screen */
+        #auth-screen { max-width: 420px; margin: 80px auto; background: #1e293b; padding: 32px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        #auth-screen h2 { color: #38bdf8; font-size: 24px; margin-bottom: 8px; text-align: center; }
+        #auth-screen p { color: #94a3b8; font-size: 13px; text-align: center; margin-bottom: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #cbd5e1; margin-bottom: 6px; font-weight: 500; }
+        .form-control { width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; font-size: 14px; outline: none; transition: border 0.2s; }
+        .form-control:focus { border-color: #38bdf8; }
+        .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn-primary { background: #0284c7; color: white; width: 100%; }
+        .btn-primary:hover { background: #0369a1; }
+        .btn-success { background: #10b981; color: #022c22; }
+        .btn-success:hover { background: #059669; }
+        .btn-secondary { background: #334155; color: #f8fafc; }
+        .btn-secondary:hover { background: #475569; }
+        .btn-danger { background: #ef4444; color: white; padding: 6px 12px; font-size: 12px; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+        /* Dashboard Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid #334155; margin-bottom: 24px; flex-wrap: wrap; gap: 15px; }
+        .brand h1 { font-size: 22px; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+        .brand p { color: #94a3b8; font-size: 13px; margin-top: 2px; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .role-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .role-admin { background: #a855f7; color: white; }
+        .role-user { background: #0284c7; color: white; }
+
+        /* Navigation */
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .tab-btn { background: transparent; border: none; color: #94a3b8; font-size: 15px; font-weight: 600; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active { background: #1e293b; color: #38bdf8; }
+
+        /* Stats Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card { background: #1e293b; padding: 18px; border-radius: 12px; border: 1px solid #334155; }
+        .card-title { font-size: 12px; text-transform: uppercase; color: #94a3b8; font-weight: 600; margin-bottom: 6px; }
+        .card-value { font-size: 24px; font-weight: bold; color: #f8fafc; }
+        .card-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+        
+        .progress-bar { background: #0f172a; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 8px; border: 1px solid #334155; }
+        .progress-fill { background: #38bdf8; height: 100%; transition: width 0.3s; }
+
+        /* Section & Tables */
+        .section { background: #1e293b; border-radius: 12px; border: 1px solid #334155; padding: 20px; margin-bottom: 24px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .section-title { font-size: 16px; font-weight: 600; color: #e2e8f0; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 12px; color: #94a3b8; font-weight: 600; border-bottom: 1px solid #334155; }
+        td { padding: 12px; border-bottom: 1px solid #334155; vertical-align: middle; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .status-badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .status-active { background: #10b981; color: #022c22; }
+        .status-suspended { background: #ef4444; color: white; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-box { background: #1e293b; width: 100%; max-width: 440px; padding: 24px; border-radius: 14px; border: 1px solid #334155; }
+        .modal-header { font-size: 18px; font-weight: bold; margin-bottom: 16px; color: #38bdf8; display: flex; justify-content: space-between; align-items: center; }
+        .modal-close { cursor: pointer; color: #94a3b8; font-size: 20px; }
+
+        /* File Upload Area & Folders */
+        .upload-bar { display: flex; gap: 12px; align-items: center; background: #0f172a; padding: 14px; border-radius: 10px; border: 1px dashed #38bdf8; margin-bottom: 16px; flex-wrap: wrap; }
+        .sub-nav { display: flex; gap: 8px; margin-bottom: 16px; }
+        .sub-btn { background: #0f172a; border: 1px solid #334155; color: #cbd5e1; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .sub-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
+        .site-link-box { background: #0f172a; padding: 12px 16px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* Folders & Breadcrumbs */
+        .breadcrumb-bar { display: flex; align-items: center; gap: 8px; background: #0f172a; padding: 10px 16px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 16px; font-size: 13px; flex-wrap: wrap; }
+        .breadcrumb-link { color: #38bdf8; cursor: pointer; font-weight: 500; text-decoration: none; }
+        .breadcrumb-link:hover { text-decoration: underline; }
+        .breadcrumb-separator { color: #64748b; }
+        .folder-row { cursor: pointer; }
+        .folder-row:hover td { background: rgba(56, 189, 248, 0.06) !important; }
+
+        /* Drag & Drop */
+        .drop-zone { border: 2px dashed #38bdf8; background: rgba(15, 23, 42, 0.6); padding: 22px; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+        .drop-zone:hover, .drop-zone.dragover { background: #1e293b; border-color: #60a5fa; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
+        .batch-progress-box { background: #0f172a; border: 1px solid #0284c7; padding: 16px; border-radius: 10px; margin-bottom: 16px; }
+
+        /* Thumbnails in List Table */
+        .file-thumb-container { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; overflow: hidden; background: #0f172a; border: 1px solid #334155; margin-right: 12px; flex-shrink: 0; }
+        .file-thumb-img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: transform 0.2s; }
+        .file-thumb-img:hover { transform: scale(1.15); }
+        .file-icon { font-size: 20px; }
+        .file-name-click { cursor: pointer; transition: color 0.15s; font-weight: 600; }
+        .file-name-click:hover { color: #38bdf8; text-decoration: underline; }
+
+        /* Grid / Gallery View */
+        .view-mode-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+        .view-mode-btns { display: flex; gap: 6px; }
+        .view-mode-btn { background: #0f172a; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+        .view-mode-btn.active { background: #0284c7; color: #fff; border-color: #0284c7; }
+        .files-grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-top: 14px; }
+        @media (max-width: 600px) {
+            .files-grid-container { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+        }
+        .grid-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; position: relative; }
+        .grid-card:hover { transform: translateY(-3px); border-color: #38bdf8; box-shadow: 0 8px 20px rgba(0,0,0,0.35); }
+        .grid-thumb-box { width: 100%; aspect-ratio: 1 / 1; background: #020617; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative; }
+        .grid-thumb-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .grid-card:hover .grid-thumb-img { transform: scale(1.06); }
+        .grid-info { padding: 10px; font-size: 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .grid-name { font-weight: 600; color: #f8fafc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; cursor: pointer; }
+        .grid-name:hover { color: #38bdf8; }
+        .grid-meta { color: #94a3b8; font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .grid-actions { display: flex; gap: 4px; }
+        .grid-actions button, .grid-actions a { flex: 1; padding: 4px 6px; font-size: 11px; text-align: center; }
+
+        /* Fullscreen Lightbox Photo Gallery ("deslizar como se fosse uma galeria") */
+        #modal-gallery {
+            display: none;
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            z-index: 99999;
+            background: #000;
+            flex-direction: column;
+            justify-content: space-between;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+        }
+        #modal-gallery.active { display: flex; }
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            background: rgba(10, 15, 26, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            z-index: 30;
+            flex-shrink: 0;
+            min-height: 50px;
+        }
+        .gallery-title-box { display: flex; flex-direction: column; overflow: hidden; max-width: 46vw; }
+        .gallery-title { font-size: 14px; font-weight: 600; color: #f8fafc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .gallery-meta { font-size: 11px; color: #94a3b8; }
+        .gallery-counter { font-size: 12px; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.3); white-space: nowrap; }
+        .gallery-actions { display: flex; gap: 8px; align-items: center; }
+        
+        .gallery-stage {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            touch-action: none !important; /* CRUCIAL: Permite deslizar livremente no telemóvel sem interferência do browser */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .gallery-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #f8fafc;
+            font-size: 32px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 25;
+            outline: none;
+        }
+        .gallery-nav-btn:hover { background: #0284c7; border-color: #38bdf8; transform: translateY(-50%) scale(1.08); }
+        .gallery-nav-prev { left: 14px; }
+        .gallery-nav-next { right: 14px; }
+        @media (max-width: 600px) {
+            .gallery-nav-prev { left: 6px; width: 38px; height: 38px; font-size: 24px; background: rgba(0,0,0,0.55); }
+            .gallery-nav-next { right: 6px; width: 38px; height: 38px; font-size: 24px; background: rgba(0,0,0,0.55); }
+            .gallery-title-box { max-width: 40vw; }
+            .gallery-btn-text-hide { display: none; }
+        }
+
+        .gallery-img-wrapper {
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        #gallery-img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.95);
+            will-change: transform, opacity;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none; /* Permite que o toque no ecrã passe diretamente para o palco de deslize */
+        }
+
+        .gallery-strip {
+            display: flex;
+            gap: 8px;
+            padding: 8px 14px;
+            overflow-x: auto;
+            background: rgba(10, 15, 26, 0.92);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 56px;
+            max-height: 64px;
+            z-index: 30;
+            flex-shrink: 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        .gallery-thumb {
+            width: 42px;
+            height: 42px;
+            border-radius: 6px;
+            object-fit: cover;
+            opacity: 0.45;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .gallery-thumb:hover { opacity: 0.85; transform: scale(1.05); }
+        .gallery-thumb.active {
+            opacity: 1;
+            border-color: #38bdf8;
+            transform: scale(1.12);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+        }
+
+        /* Media Viewer Modals */
+        .viewer-box-lg { max-width: 860px; width: 95%; }
+
+        /* Drag & Drop Feedback for Folders & Items */
+        .item-draggable { cursor: grab; user-select: none; }
+        .item-draggable:active { cursor: grabbing; }
+        .item-dragging { opacity: 0.45; }
+        .drag-target-folder {
+            background: rgba(56, 189, 248, 0.22) !important;
+            outline: 2px dashed #38bdf8 !important;
+            outline-offset: -2px;
+            border-radius: 8px;
+            transform: scale(1.02);
+            transition: all 0.15s ease;
+        }
+        #touch-drag-ghost {
+            position: fixed;
+            z-index: 99999;
+            pointer-events: none;
+            background: #0284c7;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transform: translate(-50%, -100%);
+        }
+        .centauro-toast {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #38bdf8;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .centauro-toast.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen">
+        <h2>⚡ Centauro</h2>
+        <p>Plataforma de Nuvem &amp; Alojamento Web (Disco Z:\ 1 TB)</p>
+        
+        <div style="display: flex; gap: 8px; margin-bottom: 20px; background: #0f172a; padding: 4px; border-radius: 8px; border: 1px solid #334155;">
+            <button id="auth-tab-login" class="btn btn-sm" style="flex: 1; background: #0284c7; color: white;" onclick="setAuthMode('login')">Entrar</button>
+            <button id="auth-tab-register" class="btn btn-sm" style="flex: 1; background: transparent; color: #94a3b8;" onclick="setAuthMode('register')">Criar Nova Conta</button>
+        </div>
+
+        <div id="auth-error" style="color: #ef4444; font-size: 13px; margin-bottom: 12px; display: none; text-align: center;"></div>
+        <div id="auth-success" style="color: #10b981; font-size: 13px; margin-bottom: 12px; display: none; text-align: center;"></div>
+
+        <!-- FORM LOGIN -->
+        <div id="form-login">
+            <div class="form-group">
+                <label>Utilizador</label>
+                <input type="text" id="login-user" class="form-control" placeholder="Nome de utilizador">
+            </div>
+            <div class="form-group">
+                <label>Palavra-passe</label>
+                <input type="password" id="login-pass" class="form-control" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary" onclick="doLogin()">Entrar no Servidor</button>
+        </div>
+
+        <!-- FORM REGISTER -->
+        <div id="form-register" style="display: none;">
+            <div class="form-group">
+                <label>Nome Completo</label>
+                <input type="text" id="reg-name" class="form-control" placeholder="ex: Pedro Santos">
+            </div>
+            <div class="form-group">
+                <label>Nome de Utilizador (login)</label>
+                <input type="text" id="reg-user" class="form-control" placeholder="ex: pedrosantos">
+            </div>
+            <div class="form-group">
+                <label>Palavra-passe</label>
+                <input type="password" id="reg-pass" class="form-control" placeholder="Mínimo 4 caracteres">
+            </div>
+            <button class="btn btn-success" style="width: 100%;" onclick="doRegister()">Criar Conta &amp; Obter Espaço (5 GB)</button>
+            <p style="margin-top: 12px; text-align: center; color: #64748b; font-size: 11px;">
+                Cada utilizador recebe 5 GB iniciais e uma pasta para o seu site próprio. O administrador pode aumentar o espaço a qualquer altura!
+            </p>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="app-screen" style="display: none;">
+        <header>
+            <div class="brand">
+                <h1>⚡ Centauro</h1>
+                <p>Plataforma de Nuvem &amp; Alojamento Web (Disco Z:\ 1 TB)</p>
+            </div>
+            <div class="user-info">
+                <span id="user-name-display" style="font-weight: 600;"></span>
+                <span id="user-role-display" class="role-badge"></span>
+                <button class="btn btn-secondary btn-sm" onclick="openChangePasswordModal()">🔑 Palavra-passe</button>
+                <button class="btn btn-secondary btn-sm" onclick="doLogout()">Sair</button>
+            </div>
+        </header>
+
+        <!-- NAVIGATION TABS -->
+        <div class="tabs">
+            <button class="tab-btn" id="tab-btn-admin" onclick="switchTab('admin')">📊 Painel de Administração</button>
+            <button class="tab-btn active" id="tab-btn-drive" onclick="switchTab('drive')">📁 O Meu Espaço (Drive &amp; Site)</button>
+        </div>
+
+        <!-- ================= ADMIN TAB ================= -->
+        <div id="view-admin" style="display: none;">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-title">Armazenamento Total do Disco Z:</div>
+                    <div class="card-value" id="stat-disk-free">-- GB</div>
+                    <div class="card-sub" id="stat-disk-total">-- GB Total</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Utilizadores Registados</div>
+                    <div class="card-value" id="stat-users-count">--</div>
+                    <div class="card-sub">Contas com pastas ativas no disco</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Espaço Total Alocado</div>
+                    <div class="card-value" id="stat-total-quota">-- GB</div>
+                    <div class="card-sub">Soma das quotas atribuídas</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-title">👥 Gestão de Utilizadores &amp; Quotas de Disco</span>
+                    <button class="btn btn-success btn-sm" onclick="openNewUserModal()">+ Criar Novo Utilizador</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Utilizador</th>
+                            <th>Tipo</th>
+                            <th>Uso / Quota Atribuída</th>
+                            <th>Estado</th>
+                            <th style="text-align: right;">Ações de Quota &amp; Conta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-users-table">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ================= USER DRIVE & HOSTING TAB ================= -->
+        <div id="view-drive">
+            <!-- Inspection Banner (Apenas visivel quando o Administrador explora outra conta) -->
+            <div id="admin-inspect-banner" style="display: none; background: #0c4a6e; border: 1px solid #0284c7; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 24px;">👁️</span>
+                    <div>
+                        <div style="font-size: 15px; font-weight: bold; color: #f8fafc;">A Inspecionar Conta de: <span id="inspect-user-name" style="color: #38bdf8;"></span> (<span id="inspect-user-username" style="color: #94a3b8;"></span>)</div>
+                        <div style="font-size: 12px; color: #cbd5e1;">Acesso total aos ficheiros e site deste utilizador como Administrador.</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="exitInspectMode()">← Voltar ao Painel Admin</button>
+            </div>
+
+            <!-- Quota meter for the current user -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="card-title">O Teu Espaço no Disco Z:</span>
+                    <span id="my-quota-text" style="font-weight: bold; color: #38bdf8;">-- MB / -- GB</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="my-quota-fill" class="progress-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="sub-nav">
+                    <button class="sub-btn active" id="sub-btn-files" onclick="switchFolderType('files')">📁 Ficheiros Pessoais (Nuvem Privada)</button>
+                    <button class="sub-btn" id="sub-btn-www" onclick="switchFolderType('www')">🌐 Meu Website Público (public_html / www)</button>
+                </div>
+
+                <!-- Site URL Notice (when on 'www' tab) -->
+                <div id="site-url-box" class="site-link-box" style="display: none;">
+                    <div>
+                        <span style="font-size: 13px; color: #94a3b8;">O teu site está publicado neste endereço:</span><br>
+                        <strong id="site-url-link" style="color: #38bdf8; font-family: monospace; font-size: 14px;"></strong>
+                    </div>
+                    <a id="site-url-anchor" href="#" target="_blank" class="btn btn-primary btn-sm">Abrir Meu Site ↗</a>
+                </div>
+
+                <!-- Breadcrumbs & Directory Navigation Bar -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                    <div id="breadcrumb-container" class="breadcrumb-bar" style="margin-bottom: 0; flex: 1;">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn btn-secondary btn-sm" id="btn-up-folder" style="display: none;" onclick="goUpFolder()">⬆️ Pasta Anterior</button>
+                        <button class="btn btn-secondary btn-sm" onclick="openNewFolderModal()">📁 + Nova Pasta</button>
+                        <button class="btn btn-secondary btn-sm" onclick="triggerFolderUpload()" title="Subir uma pasta inteira do computador ou da app Ficheiros">📁 Subir Pasta Completa</button>
+                        <button class="btn btn-primary btn-sm" onclick="openFolderWithPhotosModal()" title="Cria uma pasta com o nome que escolheres e sobe as fotos da galeria">📸 Criar Pasta &amp; Subir Fotos</button>
+                    </div>
+                </div>
+
+                <!-- Entradas ocultas para ficheiros, pastas e galeria -->
+                <input type="file" id="file-input" multiple style="display: none;" onchange="handleFileSelection(event)">
+                <input type="file" id="folder-input" webkitdirectory directory multiple style="display: none;" onchange="handleFolderSelection(event)">
+                <input type="file" id="gallery-to-folder-input" multiple accept="image/*,video/*" style="display: none;" onchange="handleGalleryToFolderSelection(event)">
+
+                <div id="drop-zone" class="drop-zone">
+                    <div style="font-size: 32px; margin-bottom: 6px;">📤</div>
+                    <div style="font-weight: 600; font-size: 15px; color: #f8fafc; margin-bottom: 10px;">
+                        Arrasta pastas ou fotos para aqui ou escolhe uma opção:
+                    </div>
+                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px;">
+                        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('file-input').click()">📄 Escolher Fotos / Ficheiros</button>
+                        <button class="btn btn-secondary btn-sm" onclick="triggerFolderUpload()">📁 Escolher Pasta Completa</button>
+                        <button class="btn btn-primary btn-sm" onclick="openFolderWithPhotosModal()">📸 Criar Pasta &amp; Subir Fotos da Galeria</button>
+                    </div>
+                    <div style="font-size: 12px; color: #94a3b8;">
+                        ✨ <b>Sem limite de quantidade de ficheiros!</b> Sobe pastas inteiras ou centenas de fotos.<br>
+                        Preserva 100% da definição original e todos os metadados (resolução máxima, EXIF da câmara, datas originais).
+                    </div>
+                </div>
+
+                <!-- Batch Upload Progress Area -->
+                <div id="upload-progress-box" class="batch-progress-box" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span id="upload-status-text" style="font-size: 13px; font-weight: 600; color: #38bdf8;">A enviar ficheiros...</span>
+                        <span id="upload-percent-text" style="font-size: 13px; font-weight: bold; color: #10b981;">0%</span>
+                    </div>
+                    <div class="progress-bar" style="height: 10px; margin-top: 0;">
+                        <div id="upload-progress-bar-fill" class="progress-fill" style="width: 0%; background: #10b981;"></div>
+                    </div>
+                    <div id="upload-detail-text" style="font-size: 12px; color: #94a3b8; margin-top: 6px;"></div>
+                </div>
+
+                <!-- Barra de Modo de Visualização (Lista vs Galeria) -->
+                <div class="view-mode-bar">
+                    <div style="font-size: 13px; color: #94a3b8;" id="files-summary-text">A carregar conteúdos...</div>
+                    <div class="view-mode-btns">
+                        <button class="view-mode-btn active" id="btn-mode-list" onclick="setFilesViewMode('list')">📋 Lista</button>
+                        <button class="view-mode-btn" id="btn-mode-grid" onclick="setFilesViewMode('grid')">🖼️ Galeria de Fotos</button>
+                    </div>
+                </div>
+
+                <!-- 1. VISTA DE LISTA (TABELA) -->
+                <div id="files-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Tamanho</th>
+                                <th>Última Modificação</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="files-table">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 2. VISTA DE GRELHA / GALERIA DE FOTOS -->
+                <div id="files-grid-container" class="files-grid-container" style="display: none;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: AJUSTAR QUOTA (Aumentar / Diminuir) -->
+<div class="modal" id="modal-quota">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>✏️ Ajustar Quota de Disco</span>
+            <span class="modal-close" onclick="closeModal('modal-quota')">&times;</span>
+        </div>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">
+            Ajustar o espaço atribuído para o utilizador: <b id="quota-modal-user" style="color: #38bdf8;"></b>
+        </p>
+        <div class="form-group">
+            <label>Espaço Atribuído (em Gigabytes - GB):</label>
+            <input type="number" id="quota-modal-input" class="form-control" step="0.5" min="0.5" value="10">
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <button class="btn btn-secondary btn-sm" onclick="setQuotaPreset(5)">5 GB</button>
+            <button class="btn btn-secondary btn-sm" onclick="setQuotaPreset(20)">20 GB</button>
+            <button class="btn btn-secondary btn-sm" onclick="setQuotaPreset(50)">50 GB</button>
+            <button class="btn btn-secondary btn-sm" onclick="setQuotaPreset(100)">100 GB</button>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-secondary" onclick="closeModal('modal-quota')">Cancelar</button>
+            <button class="btn btn-success" onclick="saveNewQuota()">Guardar Nova Quota</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CRIAR NOVO UTILIZADOR -->
+<div class="modal" id="modal-new-user">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>+ Criar Novo Utilizador</span>
+            <span class="modal-close" onclick="closeModal('modal-new-user')">&times;</span>
+        </div>
+        <div class="form-group">
+            <label>Nome do Utilizador (Login):</label>
+            <input type="text" id="new-user-username" class="form-control" placeholder="ex: carla">
+        </div>
+        <div class="form-group">
+            <label>Nome Completo / Exibição:</label>
+            <input type="text" id="new-user-name" class="form-control" placeholder="ex: Carla Silva">
+        </div>
+        <div class="form-group">
+            <label>Palavra-passe:</label>
+            <input type="password" id="new-user-pass" class="form-control" placeholder="Definir palavra-passe">
+        </div>
+        <div class="form-group">
+            <label>Quota Inicial de Disco (GB):</label>
+            <input type="number" id="new-user-quota" class="form-control" value="10" min="1">
+        </div>
+        <div class="form-group">
+            <label>Tipo de Conta:</label>
+            <select id="new-user-role" class="form-control">
+                <option value="user">Utilizador Normal (Drive + Site)</option>
+                <option value="admin">Administrador (Acesso ao Painel)</option>
+            </select>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="closeModal('modal-new-user')">Cancelar</button>
+            <button class="btn btn-success" onclick="saveNewUser()">Criar Utilizador</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: ALTERAR PALAVRA-PASSE -->
+<div class="modal" id="modal-change-password">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>🔑 Alterar Palavra-passe</span>
+            <span class="modal-close" onclick="closeModal('modal-change-password')">&times;</span>
+        </div>
+        <div id="pwd-change-error" style="color: #ef4444; font-size: 13px; margin-bottom: 12px; display: none; text-align: center;"></div>
+        <div id="pwd-change-success" style="color: #10b981; font-size: 13px; margin-bottom: 12px; display: none; text-align: center;"></div>
+        <div class="form-group">
+            <label>Palavra-passe Atual:</label>
+            <input type="password" id="old-pass" class="form-control" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+            <label>Nova Palavra-passe:</label>
+            <input type="password" id="new-pass" class="form-control" placeholder="Mínimo 4 caracteres">
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="closeModal('modal-change-password')">Cancelar</button>
+            <button class="btn btn-success" onclick="saveNewPassword()">Guardar Nova Senha</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: ADMIN ALTERAR PALAVRA-PASSE DE QUALQUER UTILIZADOR -->
+<div class="modal" id="modal-admin-user-pwd">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>🔑 Definir Senha de Utilizador</span>
+            <span class="modal-close" onclick="closeModal('modal-admin-user-pwd')">&times;</span>
+        </div>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 14px;">
+            Definir nova palavra-passe para a conta: <strong id="admin-pwd-target-user" style="color: #38bdf8;"></strong>
+        </p>
+        <div class="form-group">
+            <label>Nova Palavra-passe:</label>
+            <input type="password" id="admin-user-new-pwd" class="form-control" placeholder="Mínimo 4 caracteres">
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="closeModal('modal-admin-user-pwd')">Cancelar</button>
+            <button class="btn btn-success" onclick="saveAdminUserPassword()">Guardar Nova Senha</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CRIAR NOVA PASTA -->
+<div class="modal" id="modal-new-folder">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>📁 Criar Nova Pasta</span>
+            <span class="modal-close" onclick="closeModal('modal-new-folder')">&times;</span>
+        </div>
+        <div class="form-group">
+            <label>Nome da Nova Pasta:</label>
+            <input type="text" id="new-folder-name" class="form-control" placeholder="ex: Documentos, Fotos 2026, Projetos">
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="closeModal('modal-new-folder')">Cancelar</button>
+            <button class="btn btn-success" onclick="createNewFolder()">Criar Pasta</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CRIAR PASTA E SUBIR FOTOS DA GALERIA -->
+<div class="modal" id="modal-folder-with-photos">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>📸 Criar Pasta &amp; Subir Fotos da Galeria</span>
+            <span class="modal-close" onclick="closeModal('modal-folder-with-photos')">&times;</span>
+        </div>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 14px;">
+            Dá um nome à pasta onde queres guardar as fotos da galeria do teu telemóvel (ex: <i>Férias 2026</i>, <i>Fotos Família</i>, <i>Passeio</i>):
+        </p>
+        <div class="form-group">
+            <label>Nome da Pasta a Criar:</label>
+            <input type="text" id="target-folder-with-photos-name" class="form-control" placeholder="ex: Fotos iPhone, Viagem Porto">
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="closeModal('modal-folder-with-photos')">Cancelar</button>
+            <button class="btn btn-primary" onclick="proceedToPickPhotosForFolder()">📸 Escolher Fotos da Galeria</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: GALERIA DE FOTOS FULLSCREEN COM SLIDE / DESLIZAR -->
+<div id="modal-gallery">
+    <div class="gallery-header">
+        <div class="gallery-title-box">
+            <span class="gallery-title" id="gallery-title">Foto</span>
+            <span class="gallery-meta" id="gallery-meta">--</span>
+        </div>
+        <div class="gallery-counter" id="gallery-counter">1 / 1</div>
+        <div class="gallery-actions">
+            <a id="gallery-btn-download" href="#" class="btn btn-secondary btn-sm" download title="Descarregar ficheiro original">📥 <span class="gallery-btn-text-hide">Descarregar</span></a>
+            <button class="btn btn-secondary btn-sm gallery-btn-text-hide" onclick="toggleGalleryFullscreen()" title="Ecrã inteiro">⛶</button>
+            <button class="btn btn-danger btn-sm" onclick="closePhotoGallery()" style="font-size: 18px; padding: 6px 14px; border-radius: 8px; font-weight: bold;" title="Fechar">✕</button>
+        </div>
+    </div>
+
+    <div class="gallery-stage" id="gallery-stage">
+        <button class="gallery-nav-btn gallery-nav-prev" id="gallery-prev-btn" onclick="slidePhoto('prev')">‹</button>
+        <div class="gallery-img-wrapper" id="gallery-img-wrapper">
+            <img id="gallery-img" src="" alt="Foto" draggable="false">
+        </div>
+        <button class="gallery-nav-btn gallery-nav-next" id="gallery-next-btn" onclick="slidePhoto('next')">›</button>
+    </div>
+
+    <div class="gallery-strip" id="gallery-strip">
+        <!-- Miniaturas em fita horizontal geradas pelo JavaScript -->
+    </div>
+</div>
+
+<!-- MODAL: LEITOR DE VÍDEO -->
+<div class="modal" id="modal-video-viewer">
+    <div class="modal-box viewer-box-lg">
+        <div class="modal-header">
+            <span id="video-viewer-title">🎬 Reproduzir Vídeo</span>
+            <span class="modal-close" onclick="closeVideoViewer()">&times;</span>
+        </div>
+        <div style="background: #000; border-radius: 8px; overflow: hidden; display: flex; justify-content: center;">
+            <video id="video-player" controls playsinline style="max-height: 70vh; width: 100%;"></video>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+            <span id="video-viewer-meta" style="color: #94a3b8; font-size: 13px;"></span>
+            <a id="video-viewer-download" href="#" class="btn btn-secondary btn-sm" download>📥 Descarregar Ficheiro Original</a>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: LEITOR DE ÁUDIO -->
+<div class="modal" id="modal-audio-viewer">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span id="audio-viewer-title">🎵 Reproduzir Áudio</span>
+            <span class="modal-close" onclick="closeAudioViewer()">&times;</span>
+        </div>
+        <div style="padding: 24px 0; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 12px;">🎧</div>
+            <audio id="audio-player" controls style="width: 100%;"></audio>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <span id="audio-viewer-meta" style="color: #94a3b8; font-size: 13px;"></span>
+            <a id="audio-viewer-download" href="#" class="btn btn-secondary btn-sm" download>📥 Descarregar Áudio</a>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: VISUALIZADOR DE PDF -->
+<div class="modal" id="modal-pdf-viewer">
+    <div class="modal-box viewer-box-lg" style="height: 88vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="margin-bottom: 10px;">
+            <span id="pdf-viewer-title">📑 Visualizar PDF</span>
+            <span class="modal-close" onclick="closePdfViewer()">&times;</span>
+        </div>
+        <iframe id="pdf-viewer-frame" style="flex: 1; width: 100%; border: none; border-radius: 8px; background: white;"></iframe>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <span id="pdf-viewer-meta" style="color: #94a3b8; font-size: 13px;"></span>
+            <a id="pdf-viewer-download" href="#" class="btn btn-secondary btn-sm" download>📥 Descarregar PDF</a>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: VISUALIZADOR DE TEXTO / CÓDIGO -->
+<div class="modal" id="modal-text-viewer">
+    <div class="modal-box viewer-box-lg">
+        <div class="modal-header">
+            <span id="text-viewer-title">📄 Visualizar Texto</span>
+            <span class="modal-close" onclick="closeTextViewer()">&times;</span>
+        </div>
+        <pre id="text-viewer-content" style="max-height: 65vh; overflow: auto; background: #0f172a; padding: 16px; border-radius: 8px; color: #cbd5e1; font-family: monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; border: 1px solid #334155;"></pre>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+            <span id="text-viewer-meta" style="color: #94a3b8; font-size: 13px;"></span>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary btn-sm" onclick="copyTextViewerContent()">📋 Copiar Texto</button>
+                <a id="text-viewer-download" href="#" class="btn btn-secondary btn-sm" download>📥 Descarregar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+    let authToken = null;
+    let currentFolderType = 'files';
+    let targetQuotaUserId = null;
+
+    function setAuthMode(mode) {
+        document.getElementById('auth-error').style.display = 'none';
+        document.getElementById('auth-success').style.display = 'none';
+        const isLogin = mode === 'login';
+        document.getElementById('form-login').style.display = isLogin ? 'block' : 'none';
+        document.getElementById('form-register').style.display = isLogin ? 'none' : 'block';
+        document.getElementById('auth-tab-login').style.background = isLogin ? '#0284c7' : 'transparent';
+        document.getElementById('auth-tab-login').style.color = isLogin ? 'white' : '#94a3b8';
+        document.getElementById('auth-tab-register').style.background = isLogin ? 'transparent' : '#10b981';
+        document.getElementById('auth-tab-register').style.color = isLogin ? '#94a3b8' : '#022c22';
+    }
+
+    // Register
+    async function doRegister() {
+        const name = document.getElementById('reg-name').value.trim();
+        const username = document.getElementById('reg-user').value.trim();
+        const password = document.getElementById('reg-pass').value;
+        const errDiv = document.getElementById('auth-error');
+        errDiv.style.display = 'none';
+
+        if (!username || !password) {
+            errDiv.textContent = 'Preenche o nome de utilizador e a palavra-passe.';
+            errDiv.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, username, password })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                errDiv.textContent = data.error || 'Erro no registo.';
+                errDiv.style.display = 'block';
+                return;
+            }
+
+            authToken = data.token;
+            currentUser = data.user;
+            localStorage.setItem('jmc_token', authToken);
+
+            showApp();
+        } catch {
+            errDiv.textContent = 'Não foi possível ligar ao servidor.';
+            errDiv.style.display = 'block';
+        }
+    }
+
+    // Login
+    async function doLogin() {
+        const u = document.getElementById('login-user').value;
+        const p = document.getElementById('login-pass').value;
+        const errDiv = document.getElementById('auth-error');
+        errDiv.style.display = 'none';
+
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                errDiv.textContent = data.error || 'Erro no login.';
+                errDiv.style.display = 'block';
+                return;
+            }
+
+            authToken = data.token;
+            currentUser = data.user;
+            localStorage.setItem('jmc_token', authToken);
+
+            showApp();
+        } catch (e) {
+            errDiv.textContent = 'Não foi possível ligar ao servidor.';
+            errDiv.style.display = 'block';
+        }
+    }
+
+    function doLogout() {
+        authToken = null;
+        currentUser = null;
+        localStorage.removeItem('jmc_token');
+        document.getElementById('app-screen').style.display = 'none';
+        document.getElementById('auth-screen').style.display = 'block';
+    }
+
+    function showApp() {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+
+        document.getElementById('user-name-display').textContent = currentUser.name || currentUser.username;
+        const roleBadge = document.getElementById('user-role-display');
+        roleBadge.textContent = currentUser.role === 'admin' ? 'Administrador' : 'Utilizador';
+        roleBadge.className = 'role-badge ' + (currentUser.role === 'admin' ? 'role-admin' : 'role-user');
+
+        const adminTabBtn = document.getElementById('tab-btn-admin');
+        if (currentUser.role === 'admin') {
+            adminTabBtn.style.display = 'inline-block';
+            switchTab('admin');
+        } else {
+            adminTabBtn.style.display = 'none';
+            switchTab('drive');
+        }
+
+        initDragAndDrop();
+    }
+
+    function switchTab(tab) {
+        if (tab === 'admin') {
+            inspectingUser = null;
+            document.getElementById('admin-inspect-banner').style.display = 'none';
+        }
+        document.getElementById('tab-btn-admin').classList.toggle('active', tab === 'admin');
+        document.getElementById('tab-btn-drive').classList.toggle('active', tab === 'drive');
+        document.getElementById('view-admin').style.display = tab === 'admin' ? 'block' : 'none';
+        document.getElementById('view-drive').style.display = tab === 'drive' ? 'block' : 'none';
+
+        if (tab === 'admin') loadAdminDashboard();
+        if (tab === 'drive') loadUserDrive();
+    }
+
+    function inspectUserDrive(username, name, quotaMB) {
+        inspectingUser = { username, name, quota_mb: quotaMB };
+        document.getElementById('inspect-user-name').textContent = name;
+        document.getElementById('inspect-user-username').textContent = '@' + username;
+        document.getElementById('admin-inspect-banner').style.display = 'flex';
+        document.getElementById('tab-btn-admin').classList.remove('active');
+        document.getElementById('tab-btn-drive').classList.add('active');
+        document.getElementById('view-admin').style.display = 'none';
+        document.getElementById('view-drive').style.display = 'block';
+        loadUserDrive();
+    }
+
+    function exitInspectMode() {
+        inspectingUser = null;
+        document.getElementById('admin-inspect-banner').style.display = 'none';
+        switchTab('admin');
+    }
+
+    // Admin Functions
+    async function loadAdminDashboard() {
+        try {
+            // Stats
+            const resStats = await fetch('/api/stats');
+            const stats = await resStats.json();
+            document.getElementById('stat-disk-free').textContent = stats.freeGB + ' GB';
+            document.getElementById('stat-disk-total').textContent = stats.totalGB + ' GB Total (Disco Z:)';
+
+            // Users
+            const resUsers = await fetch('/api/users', { headers: { 'Authorization': 'Bearer ' + authToken } });
+            const users = await resUsers.json();
+            document.getElementById('stat-users-count').textContent = users.length;
+
+            let totalQuota = 0;
+            const tbody = document.getElementById('admin-users-table');
+            tbody.innerHTML = '';
+
+            users.forEach(u => {
+                const quotaGB = (u.quota_mb / 1024).toFixed(1);
+                totalQuota += parseFloat(quotaGB);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="cursor: pointer;" onclick="inspectUserDrive('${u.username}', '${u.name.replace(/'/g, "\\'")}', ${u.quota_mb})">
+                        <strong style="color: #38bdf8; display: inline-flex; align-items: center; gap: 6px;">📂 ${u.name}</strong><br>
+                        <span style="color: #94a3b8; font-size: 12px;">@${u.username} <i style="color: #38bdf8;">(clicar para abrir conta)</i></span>
+                    </td>
+                    <td><span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role}</span></td>
+                    <td style="min-width: 180px;">
+                        <div style="font-size: 13px; font-weight: 600;">${u.used_mb} MB / ${quotaGB} GB (${u.used_percent}%)</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min(100, u.used_percent)}%;"></div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge ${u.status === 'active' ? 'status-active' : 'status-suspended'}">
+                            ${u.status === 'active' ? 'Ativo' : 'Suspenso'}
+                        </span>
+                    </td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="openAdminUserPasswordModal('${u.id}', '${u.username}')">🔑 Senha</button>
+                        <button class="btn btn-secondary btn-sm" onclick="openQuotaModal('${u.id}', '${u.username}', ${quotaGB})">✏️ Quota</button>
+                        <button class="btn btn-secondary btn-sm" onclick="toggleUserStatus('${u.id}')">${u.status === 'active' ? '⏸️' : '▶️'}</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('stat-total-quota').textContent = totalQuota.toFixed(1) + ' GB';
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function openQuotaModal(id, username, currentGB) {
+        targetQuotaUserId = id;
+        document.getElementById('quota-modal-user').textContent = '@' + username;
+        document.getElementById('quota-modal-input').value = currentGB;
+        document.getElementById('modal-quota').classList.add('active');
+    }
+
+    function setQuotaPreset(gb) {
+        document.getElementById('quota-modal-input').value = gb;
+    }
+
+    async function saveNewQuota() {
+        const val = parseFloat(document.getElementById('quota-modal-input').value);
+        if (!val || val <= 0) return alert('Introduza um valor válido em GB.');
+
+        try {
+            const res = await fetch(`/api/users/${targetQuotaUserId}/quota`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+                body: JSON.stringify({ quota_gb: val })
+            });
+            if (res.ok) {
+                closeModal('modal-quota');
+                loadAdminDashboard();
+            } else {
+                const d = await res.json();
+                alert(d.error || 'Erro ao guardar quota.');
+            }
+        } catch {
+            alert('Falha na ligação.');
+        }
+    }
+
+    async function toggleUserStatus(id) {
+        try {
+            await fetch(`/api/users/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Authorization': 'Bearer ' + authToken }
+            });
+            loadAdminDashboard();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function openNewUserModal() {
+        document.getElementById('new-user-username').value = '';
+        document.getElementById('new-user-name').value = '';
+        document.getElementById('new-user-pass').value = '';
+        document.getElementById('new-user-quota').value = '10';
+        document.getElementById('modal-new-user').classList.add('active');
+    }
+
+    async function saveNewUser() {
+        const u = document.getElementById('new-user-username').value.trim();
+        const n = document.getElementById('new-user-name').value.trim();
+        const p = document.getElementById('new-user-pass').value;
+        const q = document.getElementById('new-user-quota').value;
+        const r = document.getElementById('new-user-role').value;
+
+        if (!u || !p) return alert('Utilizador e password são obrigatórios.');
+
+        try {
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+                body: JSON.stringify({ username: u, name: n, password: p, quota_gb: q, role: r })
+            });
+            if (res.ok) {
+                closeModal('modal-new-user');
+                loadAdminDashboard();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Erro ao criar utilizador.');
+            }
+        } catch {
+            alert('Falha na ligação.');
+        }
+    }
+
+    // User Drive & Website Functions
+    let currentSubPath = '';
+
+    async function loadUserDrive() {
+        try {
+            let activeUsername = currentUser.username;
+            let activeQuotaMB = currentUser.quota_mb;
+
+            if (inspectingUser) {
+                activeUsername = inspectingUser.username;
+                activeQuotaMB = inspectingUser.quota_mb;
+            } else {
+                // Refresh User Quota for self
+                const resMe = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + authToken } });
+                const me = await resMe.json();
+                currentUser = me.user;
+                activeQuotaMB = currentUser.quota_mb;
+            }
+
+            const qGB = (activeQuotaMB / 1024).toFixed(1);
+            if (inspectingUser) {
+                document.getElementById('my-quota-text').textContent = `Conta de @${inspectingUser.username} | Quota: ${qGB} GB`;
+                document.getElementById('my-quota-fill').style.width = '100%';
+            } else {
+                document.getElementById('my-quota-text').textContent = `${currentUser.used_mb} MB usados de ${qGB} GB (${currentUser.used_percent}%)`;
+                document.getElementById('my-quota-fill').style.width = Math.min(100, currentUser.used_percent) + '%';
+            }
+
+            // Site link
+            const siteUrl = `${window.location.origin}/sites/${activeUsername}/`;
+            document.getElementById('site-url-link').textContent = siteUrl;
+            document.getElementById('site-url-anchor').href = siteUrl;
+
+            // Load files
+            loadFiles();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function switchFolderType(type) {
+        currentFolderType = type;
+        currentSubPath = '';
+        document.getElementById('sub-btn-files').classList.toggle('active', type === 'files');
+        document.getElementById('sub-btn-www').classList.toggle('active', type === 'www');
+        document.getElementById('site-url-box').style.display = type === 'www' ? 'flex' : 'none';
+        loadUserDrive();
+    }
+
+    function navigateToFolder(name) {
+        currentSubPath = currentSubPath ? (currentSubPath + '/' + name) : name;
+        loadFiles();
+    }
+
+    function navigateToPath(targetPath) {
+        currentSubPath = targetPath;
+        loadFiles();
+    }
+
+    function goUpFolder() {
+        if (!currentSubPath) return;
+        const parts = currentSubPath.split('/');
+        parts.pop();
+        currentSubPath = parts.join('/');
+        loadFiles();
+    }
+
+    function renderBreadcrumbs(currentPath) {
+        currentSubPath = currentPath || '';
+        const btnUp = document.getElementById('btn-up-folder');
+        if (btnUp) {
+            btnUp.style.display = currentSubPath ? 'inline-block' : 'none';
+            if (currentSubPath) {
+                setupFolderDropTarget(btnUp, '..');
+            }
+        }
+
+        const container = document.getElementById('breadcrumb-container');
+        if (!container) return;
+
+        const rootName = currentFolderType === 'www' ? '🌐 Website (www)' : '📁 Raiz';
+        let html = `<span class="breadcrumb-link" onclick="navigateToPath('')">${rootName}</span>`;
+
+        if (currentSubPath) {
+            const parts = currentSubPath.split('/');
+            let accum = '';
+            for (let i = 0; i < parts.length; i++) {
+                accum = accum ? (accum + '/' + parts[i]) : parts[i];
+                const isLast = i === parts.length - 1;
+                html += ` <span class="breadcrumb-separator">/</span> `;
+                if (isLast) {
+                    html += `<strong style="color: #f8fafc;">${parts[i]}</strong>`;
+                } else {
+                    const thisPath = accum;
+                    html += `<span class="breadcrumb-link" onclick="navigateToPath('${thisPath}')">${parts[i]}</span>`;
+                }
+            }
+        }
+        container.innerHTML = html;
+    }
+
+    function openNewFolderModal() {
+        document.getElementById('new-folder-name').value = '';
+        document.getElementById('modal-new-folder').classList.add('active');
+    }
+
+    async function createNewFolder() {
+        const name = document.getElementById('new-folder-name').value.trim();
+        if (!name) return alert('Por favor introduza o nome da pasta.');
+
+        const targetUser = inspectingUser ? inspectingUser.username : null;
+        try {
+            const res = await fetch('/api/folders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+                body: JSON.stringify({
+                    folder_name: name,
+                    path: currentSubPath,
+                    type: currentFolderType,
+                    target_user: targetUser
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                closeModal('modal-new-folder');
+                loadFiles();
+            } else {
+                alert(data.error || 'Erro ao criar pasta.');
+            }
+        } catch {
+            alert('Falha na ligação com o servidor.');
+        }
+    }
+
+    // ==========================================
+    // VISTA DE FICHEIROS & VISUALIZADORES / GALERIA
+    // ==========================================
+    let currentFolderItems = [];
+    let currentGalleryPhotos = [];
+    let currentGalleryIndex = 0;
+    let filesViewMode = localStorage.getItem('centauro_view_mode') || 'list';
+
+    const IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.avif', '.ico'];
+    const VIDEO_EXTS = ['.mp4', '.webm', '.mov', '.mkv', '.ogg'];
+    const AUDIO_EXTS = ['.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac'];
+    const PDF_EXTS = ['.pdf'];
+    const TEXT_EXTS = ['.txt', '.log', '.md', '.json', '.csv', '.xml', '.js', '.html', '.css', '.py', '.sh', '.bat', '.sql'];
+
+    function getFileExt(filename) {
+        const idx = filename.lastIndexOf('.');
+        return idx !== -1 ? filename.substring(idx).toLowerCase() : '';
+    }
+
+    function isImageFile(filename) { return IMAGE_EXTS.includes(getFileExt(filename)); }
+    function isVideoFile(filename) { return VIDEO_EXTS.includes(getFileExt(filename)); }
+    function isAudioFile(filename) { return AUDIO_EXTS.includes(getFileExt(filename)); }
+    function isPdfFile(filename) { return PDF_EXTS.includes(getFileExt(filename)); }
+    function isTextFile(filename) { return TEXT_EXTS.includes(getFileExt(filename)); }
+
+    function getFileStreamUrl(filename, inline = true) {
+        const targetParam = inspectingUser ? `&target_user=${encodeURIComponent(inspectingUser.username)}` : '';
+        const pathParam = currentSubPath ? `&path=${encodeURIComponent(currentSubPath)}` : '';
+        const ep = inline ? '/api/view' : '/api/download';
+        return `${ep}?type=${currentFolderType}${pathParam}&filename=${encodeURIComponent(filename)}&token=${encodeURIComponent(authToken)}${targetParam}`;
+    }
+
+    function getFileIcon(filename) {
+        if (isImageFile(filename)) return '🖼️';
+        if (isVideoFile(filename)) return '🎬';
+        if (isAudioFile(filename)) return '🎵';
+        if (isPdfFile(filename)) return '📑';
+        if (isTextFile(filename)) return '📄';
+        const ext = getFileExt(filename);
+        if (['.zip', '.rar', '.7z', '.tar', '.gz'].includes(ext)) return '📦';
+        if (['.doc', '.docx'].includes(ext)) return '📝';
+        if (['.xls', '.xlsx'].includes(ext)) return '📊';
+        return '📄';
+    }
+
+    function setFilesViewMode(mode) {
+        filesViewMode = mode;
+        localStorage.setItem('centauro_view_mode', mode);
+        document.getElementById('btn-mode-list').classList.toggle('active', mode === 'list');
+        document.getElementById('btn-mode-grid').classList.toggle('active', mode === 'grid');
+        document.getElementById('files-table-container').style.display = mode === 'list' ? 'block' : 'none';
+        document.getElementById('files-grid-container').style.display = mode === 'grid' ? 'grid' : 'none';
+    }
+
+    async function loadFiles() {
+        try {
+            const targetParam = inspectingUser ? `&target_user=${encodeURIComponent(inspectingUser.username)}` : '';
+            const pathParam = currentSubPath ? `&path=${encodeURIComponent(currentSubPath)}` : '';
+            const res = await fetch(`/api/files?type=${currentFolderType}${pathParam}${targetParam}`, {
+                headers: { 'Authorization': 'Bearer ' + authToken }
+            });
+            const data = await res.json();
+            renderBreadcrumbs(data.current_path);
+
+            currentFolderItems = data.items || [];
+            currentGalleryPhotos = currentFolderItems.filter(item => !item.is_dir && isImageFile(item.name));
+
+            // Atualizar sumário
+            const summaryEl = document.getElementById('files-summary-text');
+            if (summaryEl) {
+                const totalItems = currentFolderItems.length;
+                const photoCount = currentGalleryPhotos.length;
+                summaryEl.textContent = `${totalItems} item(ns)${photoCount > 0 ? ` (${photoCount} fotografia(s))` : ''}`;
+            }
+
+            // Aplicar modo atual guardado
+            setFilesViewMode(filesViewMode);
+
+            renderFilesTable(currentFolderItems);
+            renderFilesGrid(currentFolderItems);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function renderFilesTable(items) {
+        const tbody = document.getElementById('files-table');
+        tbody.innerHTML = '';
+
+        if (items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b; padding: 28px;">Esta pasta está vazia. Arrasta ficheiros ou seleciona para enviar!</td></tr>';
+            return;
+        }
+
+        items.forEach(item => {
+            const tr = document.createElement('tr');
+            const dateStr = item.modified ? new Date(item.modified).toLocaleString('pt-PT') : '--';
+            const cleanName = item.name.replace(/'/g, "\\'");
+
+            if (item.is_dir) {
+                tr.className = 'folder-row';
+                tr.innerHTML = `
+                    <td onclick="navigateToFolder('${cleanName}')">
+                        <div style="display: flex; align-items: center;">
+                            <div class="file-thumb-container" style="background: rgba(56, 189, 248, 0.08); border-color: rgba(56, 189, 248, 0.3);">
+                                <span class="file-icon">📁</span>
+                            </div>
+                            <div>
+                                <strong style="color: #38bdf8;">${item.name}</strong>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color: #64748b; font-style: italic;">Pasta</td>
+                    <td style="color: #64748b;">${dateStr}</td>
+                    <td style="text-align: right; white-space: nowrap; gap: 6px;">
+                        <button class="btn btn-danger btn-sm" onclick="deleteItem('${cleanName}', true)">🗑️ Apagar</button>
+                    </td>
+                `;
+                // Pastas aceitam que outros itens sejam arrastados para cima delas E podem ser arrastadas
+                setupFolderDropTarget(tr, item.name);
+                setupItemDragAndTouch(tr, item.name, true);
+            } else {
+                const isImg = isImageFile(item.name);
+                const viewUrl = getFileStreamUrl(item.name, true);
+                const downloadUrl = getFileStreamUrl(item.name, false);
+                const sizeStr = item.size_mb >= 1 ? `${item.size_mb} MB` : `${item.size_kb} KB`;
+                const icon = getFileIcon(item.name);
+
+                let thumbHtml = '';
+                if (isImg) {
+                    thumbHtml = `
+                        <div class="file-thumb-container" title="Toque para abrir na Galeria">
+                            <img class="file-thumb-img" src="${viewUrl}" loading="lazy" alt="${item.name}">
+                        </div>
+                    `;
+                } else {
+                    thumbHtml = `
+                        <div class="file-thumb-container" title="Toque para pré-visualizar">
+                            <span class="file-icon">${icon}</span>
+                        </div>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td onclick="${isImg ? `openPhotoGallery('${cleanName}')` : `previewFile('${cleanName}')`}" style="cursor: pointer;">
+                        <div style="display: flex; align-items: center;">
+                            ${thumbHtml}
+                            <div>
+                                <strong class="file-name-click" style="${isImg ? 'color: #38bdf8;' : ''}">${item.name}</strong>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color: #94a3b8;">${sizeStr}</td>
+                    <td style="color: #64748b;">${dateStr}</td>
+                    <td style="text-align: right; white-space: nowrap; gap: 6px;">
+                        <button class="btn btn-secondary btn-sm" onclick="previewFile('${cleanName}')" style="color: #38bdf8;">👁️ Ver</button>
+                        <a href="${downloadUrl}" class="btn btn-secondary btn-sm" download="${item.name}">📥 Descarregar</a>
+                        <button class="btn btn-danger btn-sm" onclick="deleteItem('${cleanName}', false)">🗑️ Apagar</button>
+                    </td>
+                `;
+                // Ficheiros podem ser arrastados para pastas
+                setupItemDragAndTouch(tr, item.name, false);
+            }
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderFilesGrid(items) {
+        const grid = document.getElementById('files-grid-container');
+        grid.innerHTML = '';
+
+        if (items.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 28px;">Esta pasta está vazia.</div>';
+            return;
+        }
+
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'grid-card';
+            const cleanName = item.name.replace(/'/g, "\\'");
+            const dateStr = item.modified ? new Date(item.modified).toLocaleDateString('pt-PT') : '--';
+
+            if (item.is_dir) {
+                card.innerHTML = `
+                    <div class="grid-thumb-box" onclick="navigateToFolder('${cleanName}')" style="background: rgba(56, 189, 248, 0.05); cursor: pointer;">
+                        <span style="font-size: 48px;">📁</span>
+                    </div>
+                    <div class="grid-info">
+                        <div class="grid-name" onclick="navigateToFolder('${cleanName}')" style="color: #38bdf8; cursor: pointer;">${item.name}</div>
+                        <div class="grid-meta"><span>Pasta</span><span>${dateStr}</span></div>
+                        <div class="grid-actions">
+                            <button class="btn btn-danger btn-sm" style="width: 100%;" onclick="deleteItem('${cleanName}', true)">🗑️ Apagar</button>
+                        </div>
+                    </div>
+                `;
+                setupFolderDropTarget(card, item.name);
+                setupItemDragAndTouch(card, item.name, true);
+            } else {
+                const isImg = isImageFile(item.name);
+                const viewUrl = getFileStreamUrl(item.name, true);
+                const downloadUrl = getFileStreamUrl(item.name, false);
+                const sizeStr = item.size_mb >= 1 ? `${item.size_mb} MB` : `${item.size_kb} KB`;
+                const icon = getFileIcon(item.name);
+
+                let thumbHtml = '';
+                if (isImg) {
+                    thumbHtml = `
+                        <div class="grid-thumb-box" style="cursor: pointer;">
+                            <img class="grid-thumb-img" src="${viewUrl}" loading="lazy" alt="${item.name}">
+                        </div>
+                    `;
+                } else {
+                    thumbHtml = `
+                        <div class="grid-thumb-box" style="cursor: pointer;">
+                            <span style="font-size: 44px;">${icon}</span>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    ${thumbHtml}
+                    <div class="grid-info">
+                        <div class="grid-name" title="${item.name}" style="${isImg ? 'color: #38bdf8;' : ''}">${item.name}</div>
+                        <div class="grid-meta"><span>${sizeStr}</span><span>${dateStr}</span></div>
+                        <div class="grid-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="previewFile('${cleanName}')" style="color: #38bdf8;">👁️ Ver</button>
+                            <a href="${downloadUrl}" class="btn btn-secondary btn-sm" download="${item.name}">📥</a>
+                            <button class="btn btn-danger btn-sm" onclick="deleteItem('${cleanName}', false)">🗑️</button>
+                        </div>
+                    </div>
+                `;
+                card.style.cursor = 'pointer';
+                card.onclick = (e) => {
+                    if (e.target.closest('button, a, input')) return;
+                    if (isImg) {
+                        openPhotoGallery(cleanName);
+                    } else {
+                        previewFile(cleanName);
+                    }
+                };
+                setupItemDragAndTouch(card, item.name, false);
+            }
+            grid.appendChild(card);
+        });
+    }
+
+    // ==========================================
+    // SISTEMA DE ARRASTAR & LARGAR (DRAG & DROP E TOQUE PARA PASTAS)
+    // ==========================================
+    function setupFolderDropTarget(element, targetFolderName) {
+        element.setAttribute('data-folder-target', targetFolderName);
+
+        element.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.dataTransfer.dropEffect = 'move';
+            element.classList.add('drag-target-folder');
+        });
+
+        element.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            element.classList.remove('drag-target-folder');
+        });
+
+        element.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            element.classList.remove('drag-target-folder');
+
+            // 1. Se forem ficheiros externos do PC arrastados diretamente para esta pasta
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                const subPath = targetFolderName === '..' ? '' : (currentSubPath ? currentSubPath + '/' + targetFolderName : targetFolderName);
+                uploadBatchFiles(Array.from(e.dataTransfer.files), subPath);
+                return;
+            }
+
+            // 2. Se for um item interno (ficheiro ou pasta) arrastado
+            const sourceName = e.dataTransfer.getData('text/plain');
+            if (sourceName && sourceName !== targetFolderName) {
+                await moveItemToFolder(sourceName, targetFolderName);
+            }
+        });
+    }
+
+    function setupItemDragAndTouch(element, itemName, isDir) {
+        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+        // Apenas ativar HTML5 draggable no Computador com rato!
+        // No telemóvel, draggable="true" intercepta o toque e impede o clique/abertura de fotos no iOS Safari e Android Chrome.
+        if (!isTouch) {
+            element.setAttribute('draggable', 'true');
+            element.classList.add('item-draggable');
+
+            // Arrastar com Rato (Computador)
+            element.addEventListener('dragstart', (e) => {
+                if (e.target.closest('button, a, input')) {
+                    e.preventDefault();
+                    return;
+                }
+                e.dataTransfer.setData('text/plain', itemName);
+                e.dataTransfer.effectAllowed = 'move';
+                element.classList.add('item-dragging');
+            });
+
+            element.addEventListener('dragend', () => {
+                element.classList.remove('item-dragging');
+                document.querySelectorAll('.drag-target-folder').forEach(el => el.classList.remove('drag-target-folder'));
+            });
+        }
+
+        // Tocar e Arrastar no Telemóvel (Pressão longa >= 400ms ativa arrasto; toque rápido abre imediatamente)
+        let startX = 0, startY = 0;
+        let touchTimer = null;
+        let isTouchDragging = false;
+        let ghostEl = null;
+        let touchStartTime = 0;
+
+        element.addEventListener('touchstart', (e) => {
+            if (e.touches.length !== 1) return;
+            if (e.target.closest('button, a, input')) return;
+
+            const t = e.touches[0];
+            startX = t.clientX;
+            startY = t.clientY;
+            touchStartTime = Date.now();
+            isTouchDragging = false;
+
+            touchTimer = setTimeout(() => {
+                isTouchDragging = true;
+                if (navigator.vibrate) navigator.vibrate(40);
+
+                ghostEl = document.createElement('div');
+                ghostEl.id = 'touch-drag-ghost';
+                ghostEl.innerHTML = `<span>${isDir ? '📁' : '📄'}</span> <span>${itemName}</span>`;
+                ghostEl.style.left = startX + 'px';
+                ghostEl.style.top = (startY - 40) + 'px';
+                document.body.appendChild(ghostEl);
+                element.classList.add('item-dragging');
+            }, 400);
+        }, { passive: true });
+
+        element.addEventListener('touchmove', (e) => {
+            if (e.touches.length !== 1) return;
+            const t = e.touches[0];
+            const dx = t.clientX - startX;
+            const dy = t.clientY - startY;
+
+            if (!isTouchDragging) {
+                // Se mexer mais de 10px antes de 400ms, é scroll normal da página
+                if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                    clearTimeout(touchTimer);
+                }
+                return;
+            }
+
+            e.preventDefault(); // Impede scroll apenas quando está a arrastar para outra pasta
+
+            if (ghostEl) {
+                ghostEl.style.left = t.clientX + 'px';
+                ghostEl.style.top = (t.clientY - 40) + 'px';
+            }
+
+            const elemBelow = document.elementFromPoint(t.clientX, t.clientY);
+            const folderTarget = elemBelow ? elemBelow.closest('[data-folder-target]') : null;
+
+            document.querySelectorAll('.drag-target-folder').forEach(el => {
+                if (el !== folderTarget) el.classList.remove('drag-target-folder');
+            });
+
+            if (folderTarget) {
+                const targetName = folderTarget.getAttribute('data-folder-target');
+                if (targetName && targetName !== itemName) {
+                    folderTarget.classList.add('drag-target-folder');
+                }
+            }
+        }, { passive: false });
+
+        const endTouchDrag = async (e) => {
+            clearTimeout(touchTimer);
+            const elapsed = Date.now() - touchStartTime;
+
+            if (!isTouchDragging) {
+                // Toque curto / normal no telemóvel (< 350ms com menos de 15px de movimento)
+                // Garante que o toque abre a foto/pasta mesmo que o browser móvel suprima o clique sintético
+                const endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : startX;
+                const endY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : startY;
+                if (elapsed < 350 && Math.abs(startX - endX) < 15 && Math.abs(startY - endY) < 15) {
+                    if (e.target.closest('button, a, input')) return;
+                    if (isDir) {
+                        navigateToFolder(itemName);
+                    } else if (isImageFile(itemName)) {
+                        openPhotoGallery(itemName);
+                    } else {
+                        previewFile(itemName);
+                    }
+                }
+                return;
+            }
+
+            isTouchDragging = false;
+            element.classList.remove('item-dragging');
+
+            if (ghostEl) {
+                ghostEl.remove();
+                ghostEl = null;
+            }
+
+            let lastX = startX, lastY = startY;
+            if (e.changedTouches && e.changedTouches.length > 0) {
+                lastX = e.changedTouches[0].clientX;
+                lastY = e.changedTouches[0].clientY;
+            }
+
+            const elemBelow = document.elementFromPoint(lastX, lastY);
+            const folderTarget = elemBelow ? elemBelow.closest('[data-folder-target]') : null;
+
+            document.querySelectorAll('.drag-target-folder').forEach(el => el.classList.remove('drag-target-folder'));
+
+            if (folderTarget) {
+                const targetName = folderTarget.getAttribute('data-folder-target');
+                if (targetName && targetName !== itemName) {
+                    await moveItemToFolder(itemName, targetName);
+                }
+            }
+        };
+
+        element.addEventListener('touchend', endTouchDrag);
+        element.addEventListener('touchcancel', endTouchDrag);
+    }
+
+    async function moveItemToFolder(sourceItem, targetFolder) {
+        if (!sourceItem || !targetFolder || sourceItem === targetFolder) return;
+        const targetUser = inspectingUser ? inspectingUser.username : null;
+
+        try {
+            const res = await fetch('/api/files/move', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + authToken
+                },
+                body: JSON.stringify({
+                    item_name: sourceItem,
+                    target_folder: targetFolder,
+                    path: currentSubPath,
+                    type: currentFolderType,
+                    target_user: targetUser
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                const destLabel = targetFolder === '..' ? 'Pasta Anterior' : targetFolder;
+                showToast(`✓ "${sourceItem}" movido para "${destLabel}".`);
+                loadFiles();
+            } else {
+                alert(data.error || 'Erro ao mover item.');
+            }
+        } catch (e) {
+            alert('Falha na ligação ao mover item.');
+        }
+    }
+
+    function showToast(msg) {
+        let toast = document.getElementById('centauro-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'centauro-toast';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        toast.className = 'centauro-toast active';
+        setTimeout(() => {
+            toast.className = 'centauro-toast';
+        }, 2800);
+    }
+
+    // ==========================================
+    // GALERIA DE FOTOS FULLSCREEN COM SLIDE / DESLIZAR
+    // ==========================================
+    function openPhotoGallery(photoName) {
+        // Garantir lista de fotos
+        if (!currentGalleryPhotos || currentGalleryPhotos.length === 0) {
+            currentGalleryPhotos = [{ name: photoName }];
+            currentGalleryIndex = 0;
+        } else {
+            const idx = currentGalleryPhotos.findIndex(p => p.name === photoName);
+            currentGalleryIndex = idx !== -1 ? idx : 0;
+        }
+
+        // Gerar fita de miniaturas na barra inferior
+        const strip = document.getElementById('gallery-strip');
+        strip.innerHTML = '';
+        currentGalleryPhotos.forEach((photo, i) => {
+            const thumb = document.createElement('img');
+            thumb.className = 'gallery-thumb' + (i === currentGalleryIndex ? ' active' : '');
+            thumb.src = getFileStreamUrl(photo.name, true);
+            thumb.title = photo.name;
+            thumb.loading = 'lazy';
+            thumb.onclick = (e) => {
+                e.stopPropagation();
+                jumpToGalleryPhoto(i);
+            };
+            strip.appendChild(thumb);
+        });
+
+        renderCurrentGalleryPhoto();
+        document.getElementById('modal-gallery').classList.add('active');
+    }
+
+    function renderCurrentGalleryPhoto(slideDir = null) {
+        if (!currentGalleryPhotos || currentGalleryPhotos.length === 0) return;
+        const photo = currentGalleryPhotos[currentGalleryIndex];
+        const img = document.getElementById('gallery-img');
+
+        document.getElementById('gallery-title').textContent = photo.name;
+        const sizeStr = photo.size_mb >= 1 ? `${photo.size_mb} MB` : (photo.size_kb ? `${photo.size_kb} KB` : '');
+        const dateStr = photo.modified ? new Date(photo.modified).toLocaleDateString('pt-PT') : '';
+        document.getElementById('gallery-meta').textContent = [sizeStr, dateStr].filter(Boolean).join(' • ');
+        document.getElementById('gallery-counter').textContent = `${currentGalleryIndex + 1} / ${currentGalleryPhotos.length}`;
+
+        const dlBtn = document.getElementById('gallery-btn-download');
+        dlBtn.href = getFileStreamUrl(photo.name, false);
+        dlBtn.download = photo.name;
+
+        const photoUrl = getFileStreamUrl(photo.name, true);
+
+        if (slideDir) {
+            // Efeito suave de transição deslizante
+            img.style.transition = 'transform 0.15s ease-out, opacity 0.15s ease-out';
+            img.style.transform = slideDir === 'next' ? 'translateX(-60px)' : 'translateX(60px)';
+            img.style.opacity = '0';
+            setTimeout(() => {
+                img.src = photoUrl;
+                img.style.transition = 'none';
+                img.style.transform = slideDir === 'next' ? 'translateX(60px)' : 'translateX(-60px)';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        img.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease-out';
+                        img.style.transform = 'translateX(0px)';
+                        img.style.opacity = '1';
+                    });
+                });
+            }, 100);
+        } else {
+            img.style.transition = 'opacity 0.2s ease';
+            img.style.transform = 'translateX(0px)';
+            img.src = photoUrl;
+            img.style.opacity = '1';
+        }
+
+        // Atualizar miniatura ativa na fita inferior
+        const thumbs = document.querySelectorAll('.gallery-thumb');
+        thumbs.forEach((t, i) => {
+            const isActive = i === currentGalleryIndex;
+            t.classList.toggle('active', isActive);
+            if (isActive) {
+                t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        });
+    }
+
+    function slidePhoto(dir) {
+        if (!currentGalleryPhotos || currentGalleryPhotos.length <= 1) {
+            const img = document.getElementById('gallery-img');
+            img.style.transform = 'translateX(0px)';
+            img.style.opacity = '1';
+            return;
+        }
+        if (dir === 'next') {
+            currentGalleryIndex = (currentGalleryIndex + 1) % currentGalleryPhotos.length;
+        } else {
+            currentGalleryIndex = (currentGalleryIndex - 1 + currentGalleryPhotos.length) % currentGalleryPhotos.length;
+        }
+        renderCurrentGalleryPhoto(dir);
+    }
+
+    function jumpToGalleryPhoto(index) {
+        if (index === currentGalleryIndex) return;
+        const dir = index > currentGalleryIndex ? 'next' : 'prev';
+        currentGalleryIndex = index;
+        renderCurrentGalleryPhoto(dir);
+    }
+
+    function closePhotoGallery() {
+        document.getElementById('modal-gallery').classList.remove('active');
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+        }
+    }
+
+    function toggleGalleryFullscreen() {
+        const gal = document.getElementById('modal-gallery');
+        if (!document.fullscreenElement) {
+            if (gal.requestFullscreen) {
+                gal.requestFullscreen().catch(() => {});
+            } else if (gal.webkitRequestFullscreen) {
+                gal.webkitRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+    }
+
+    // Gesto de deslizar com o dedo (Touch Swipe para telemóveis)
+    (function initGalleryTouchSwipe() {
+        const stage = document.getElementById('gallery-stage');
+        if (!stage) return;
+        let startX = 0;
+        let startY = 0;
+        let deltaX = 0;
+        let isTouching = false;
+        let touchStartTime = 0;
+
+        stage.addEventListener('touchstart', e => {
+            if (e.touches.length === 1) {
+                if (e.target.closest('button')) return;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                deltaX = 0;
+                isTouching = true;
+                touchStartTime = Date.now();
+                const img = document.getElementById('gallery-img');
+                img.style.transition = 'none';
+            }
+        }, { passive: true });
+
+        stage.addEventListener('touchmove', e => {
+            if (!isTouching || e.touches.length !== 1) return;
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            deltaX = currentX - startX;
+            const deltaY = currentY - startY;
+
+            // Se o movimento for predominantemente horizontal, prevenir o comportamento padrão do browser (swipe back / navigation)
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 8) {
+                e.preventDefault();
+                const img = document.getElementById('gallery-img');
+                img.style.transform = `translateX(${deltaX}px)`;
+                const opacity = Math.max(0.4, 1 - Math.abs(deltaX) / (window.innerWidth * 1.2));
+                img.style.opacity = opacity.toString();
+            }
+        }, { passive: false });
+
+        const finishSwipe = (e) => {
+            if (!isTouching) return;
+            isTouching = false;
+            const img = document.getElementById('gallery-img');
+            img.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease';
+
+            const elapsed = Date.now() - touchStartTime;
+            const velocity = Math.abs(deltaX) / Math.max(1, elapsed);
+
+            // Toque rápido nos lados para avançar/recuar
+            if (Math.abs(deltaX) < 12 && elapsed < 250) {
+                const stageRect = stage.getBoundingClientRect();
+                const clickX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : startX;
+                const relX = clickX - stageRect.left;
+                if (relX < stageRect.width * 0.25) {
+                    slidePhoto('prev');
+                    return;
+                } else if (relX > stageRect.width * 0.75) {
+                    slidePhoto('next');
+                    return;
+                }
+            }
+
+            // Deslizar para próxima / anterior
+            const swipeThreshold = 35;
+            if (deltaX < -swipeThreshold || (velocity > 0.35 && deltaX < -15)) {
+                slidePhoto('next');
+            } else if (deltaX > swipeThreshold || (velocity > 0.35 && deltaX > 15)) {
+                slidePhoto('prev');
+            } else {
+                img.style.transform = 'translateX(0px)';
+                img.style.opacity = '1';
+            }
+        };
+
+        stage.addEventListener('touchend', finishSwipe);
+        stage.addEventListener('touchcancel', finishSwipe);
+    })();
+
+    // Atalhos de Teclado (Setas Esquerda / Direita e ESC)
+    window.addEventListener('keydown', e => {
+        const gal = document.getElementById('modal-gallery');
+        if (gal && gal.classList.contains('active')) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                slidePhoto('next');
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                slidePhoto('prev');
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                closePhotoGallery();
+            }
+        }
+    });
+
+    // ==========================================
+    // OUTROS VISUALIZADORES (VÍDEO, ÁUDIO, PDF, TEXTO)
+    // ==========================================
+    function openVideoViewer(filename, sizeStr, dateStr) {
+        const url = getFileStreamUrl(filename, true);
+        const player = document.getElementById('video-player');
+        player.src = url;
+        document.getElementById('video-viewer-title').textContent = `🎬 ${filename}`;
+        document.getElementById('video-viewer-meta').textContent = `${sizeStr || ''} • ${dateStr || ''}`;
+        document.getElementById('video-viewer-download').href = getFileStreamUrl(filename, false);
+        document.getElementById('video-viewer-download').download = filename;
+        document.getElementById('modal-video-viewer').classList.add('active');
+        player.play().catch(() => {});
+    }
+
+    function closeVideoViewer() {
+        const player = document.getElementById('video-player');
+        player.pause();
+        player.src = '';
+        document.getElementById('modal-video-viewer').classList.remove('active');
+    }
+
+    function openAudioViewer(filename, sizeStr, dateStr) {
+        const url = getFileStreamUrl(filename, true);
+        const player = document.getElementById('audio-player');
+        player.src = url;
+        document.getElementById('audio-viewer-title').textContent = `🎵 ${filename}`;
+        document.getElementById('audio-viewer-meta').textContent = `${sizeStr || ''} • ${dateStr || ''}`;
+        document.getElementById('audio-viewer-download').href = getFileStreamUrl(filename, false);
+        document.getElementById('audio-viewer-download').download = filename;
+        document.getElementById('modal-audio-viewer').classList.add('active');
+        player.play().catch(() => {});
+    }
+
+    function closeAudioViewer() {
+        const player = document.getElementById('audio-player');
+        player.pause();
+        player.src = '';
+        document.getElementById('modal-audio-viewer').classList.remove('active');
+    }
+
+    function openPdfViewer(filename, sizeStr, dateStr) {
+        const url = getFileStreamUrl(filename, true);
+        document.getElementById('pdf-viewer-frame').src = url;
+        document.getElementById('pdf-viewer-title').textContent = `📑 ${filename}`;
+        document.getElementById('pdf-viewer-meta').textContent = `${sizeStr || ''} • ${dateStr || ''}`;
+        document.getElementById('pdf-viewer-download').href = getFileStreamUrl(filename, false);
+        document.getElementById('pdf-viewer-download').download = filename;
+        document.getElementById('modal-pdf-viewer').classList.add('active');
+    }
+
+    function closePdfViewer() {
+        document.getElementById('pdf-viewer-frame').src = 'about:blank';
+        document.getElementById('modal-pdf-viewer').classList.remove('active');
+    }
+
+    async function openTextViewer(filename, sizeStr, dateStr) {
+        const url = getFileStreamUrl(filename, true);
+        document.getElementById('text-viewer-title').textContent = `📄 ${filename}`;
+        document.getElementById('text-viewer-meta').textContent = `${sizeStr || ''} • ${dateStr || ''}`;
+        document.getElementById('text-viewer-content').textContent = 'A carregar ficheiro...';
+        document.getElementById('text-viewer-download').href = getFileStreamUrl(filename, false);
+        document.getElementById('text-viewer-download').download = filename;
+        document.getElementById('modal-text-viewer').classList.add('active');
+
+        try {
+            const res = await fetch(url);
+            if (res.ok) {
+                const text = await res.text();
+                document.getElementById('text-viewer-content').textContent = text;
+            } else {
+                document.getElementById('text-viewer-content').textContent = 'Erro ao ler o ficheiro.';
+            }
+        } catch {
+            document.getElementById('text-viewer-content').textContent = 'Falha ao descarregar o ficheiro.';
+        }
+    }
+
+    function closeTextViewer() {
+        document.getElementById('text-viewer-content').textContent = '';
+        document.getElementById('modal-text-viewer').classList.remove('active');
+    }
+
+    function copyTextViewerContent() {
+        const txt = document.getElementById('text-viewer-content').textContent;
+        navigator.clipboard.writeText(txt).then(() => {
+            alert('Texto copiado para a área de transferência!');
+        }).catch(() => {
+            alert('Não foi possível copiar o texto automaticamente.');
+        });
+    }
+
+    function previewFile(filename) {
+        const item = currentFolderItems.find(i => i.name === filename);
+        const sizeStr = item ? (item.size_mb >= 1 ? `${item.size_mb} MB` : `${item.size_kb} KB`) : '';
+        const dateStr = item && item.modified ? new Date(item.modified).toLocaleString('pt-PT') : '';
+
+        if (isImageFile(filename)) {
+            openPhotoGallery(filename);
+        } else if (isVideoFile(filename)) {
+            openVideoViewer(filename, sizeStr, dateStr);
+        } else if (isAudioFile(filename)) {
+            openAudioViewer(filename, sizeStr, dateStr);
+        } else if (isPdfFile(filename)) {
+            openPdfViewer(filename, sizeStr, dateStr);
+        } else if (isTextFile(filename)) {
+            openTextViewer(filename, sizeStr, dateStr);
+        } else {
+            const link = document.createElement('a');
+            link.href = getFileStreamUrl(filename, false);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+
+    // MULTI-FILE & FOLDER BATCH UPLOAD (Sem limite de quantidade)
+    function handleFileSelection(event) {
+        if (event.target.files && event.target.files.length > 0) {
+            uploadBatchFiles(Array.from(event.target.files));
+            event.target.value = '';
+        }
+    }
+
+    function triggerFolderUpload() {
+        document.getElementById('folder-input').click();
+    }
+
+    function handleFolderSelection(event) {
+        if (event.target.files && event.target.files.length > 0) {
+            uploadBatchFiles(Array.from(event.target.files));
+            event.target.value = '';
+        }
+    }
+
+    let pendingTargetFolderName = '';
+
+    function openFolderWithPhotosModal() {
+        document.getElementById('target-folder-with-photos-name').value = '';
+        document.getElementById('modal-folder-with-photos').classList.add('active');
+    }
+
+    function proceedToPickPhotosForFolder() {
+        const folderName = document.getElementById('target-folder-with-photos-name').value.trim();
+        if (!folderName) {
+            alert('Por favor introduz o nome para a pasta.');
+            return;
+        }
+        pendingTargetFolderName = folderName;
+        closeModal('modal-folder-with-photos');
+        document.getElementById('gallery-to-folder-input').click();
+    }
+
+    function handleGalleryToFolderSelection(event) {
+        if (event.target.files && event.target.files.length > 0) {
+            const folderName = pendingTargetFolderName;
+            pendingTargetFolderName = '';
+            uploadBatchFiles(Array.from(event.target.files), folderName);
+            event.target.value = '';
+        }
+    }
+
+    async function uploadBatchFiles(filesList, targetSubPath = '') {
+        if (!filesList || filesList.length === 0) return;
+
+        const progressBox = document.getElementById('upload-progress-box');
+        const statusText = document.getElementById('upload-status-text');
+        const percentText = document.getElementById('upload-percent-text');
+        const fillBar = document.getElementById('upload-progress-bar-fill');
+        const detailText = document.getElementById('upload-detail-text');
+
+        progressBox.style.display = 'block';
+        const totalFiles = filesList.length;
+        let totalUploadedBytes = 0;
+        let successCount = 0;
+
+        const targetParam = inspectingUser ? `&target_user=${encodeURIComponent(inspectingUser.username)}` : '';
+
+        for (let i = 0; i < totalFiles; i++) {
+            const file = filesList[i];
+            const percent = Math.round((i / totalFiles) * 100);
+            statusText.textContent = `A enviar ${i + 1} de ${totalFiles}: ${file.name}`;
+            percentText.textContent = percent + '%';
+            fillBar.style.width = percent + '%';
+            detailText.textContent = `Ficheiro: ${(file.size / (1024 * 1024)).toFixed(2)} MB | Preservando qualidade original e metadados.`;
+
+            // Calcular caminho de destino (se for uma pasta inteira ou subida com pasta de destino)
+            let uploadPath = currentSubPath || '';
+            if (targetSubPath) {
+                uploadPath = uploadPath ? (uploadPath + '/' + targetSubPath) : targetSubPath;
+            }
+            if (file.webkitRelativePath) {
+                const parts = file.webkitRelativePath.split('/');
+                parts.pop(); // Remove o nome do ficheiro
+                const fileRelDir = parts.join('/');
+                if (fileRelDir) {
+                    uploadPath = uploadPath ? (uploadPath + '/' + fileRelDir) : fileRelDir;
+                }
+            }
+
+            const pathParam = uploadPath ? `&path=${encodeURIComponent(uploadPath)}` : '';
+
+            try {
+                const mtime = file.lastModified || Date.now();
+                const uploadUrl = `/api/upload?type=${currentFolderType}${pathParam}&filename=${encodeURIComponent(file.name)}&mtime=${mtime}${targetParam}`;
+                const res = await fetch(uploadUrl, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + authToken },
+                    body: file
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    alert(`Erro ao enviar "${file.name}": ` + (errData.error || 'Limite ou erro no envio'));
+                    break;
+                }
+                successCount++;
+                totalUploadedBytes += file.size;
+            } catch (e) {
+                alert(`Falha na ligação ao enviar "${file.name}".`);
+                break;
+            }
+        }
+
+        fillBar.style.width = '100%';
+        percentText.textContent = '100%';
+        statusText.textContent = `Envio Concluído! ${successCount} de ${totalFiles} ficheiro(s) gravado(s) com sucesso.`;
+        detailText.textContent = `Total enviado: ${(totalUploadedBytes / (1024 * 1024)).toFixed(2)} MB no Disco Z:\\.`;
+
+        loadUserDrive();
+
+        setTimeout(() => {
+            progressBox.style.display = 'none';
+        }, 3500);
+    }
+
+    async function deleteItem(name, isDir) {
+        const msg = isDir 
+            ? `Tens a certeza que queres apagar a pasta "${name}" e todo o seu conteúdo?` 
+            : `Tens a certeza que queres apagar o ficheiro "${name}"?`;
+        if (!confirm(msg)) return;
+
+        const targetParam = inspectingUser ? `&target_user=${encodeURIComponent(inspectingUser.username)}` : '';
+        const pathParam = currentSubPath ? `&path=${encodeURIComponent(currentSubPath)}` : '';
+        try {
+            const res = await fetch(`/api/files?type=${currentFolderType}${pathParam}&filename=${encodeURIComponent(name)}${targetParam}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + authToken }
+            });
+            if (res.ok) {
+                loadUserDrive();
+            } else {
+                const d = await res.json();
+                alert(d.error || 'Erro ao apagar.');
+            }
+        } catch {
+            alert('Falha na ligação.');
+        }
+    }
+
+    function initDragAndDrop() {
+        const dropZone = document.getElementById('drop-zone');
+        if (!dropZone) return;
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('dragover');
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', async e => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('dragover');
+
+            const dt = e.dataTransfer;
+            if (!dt) return;
+
+            const files = await getFilesFromDataTransfer(dt);
+            if (files && files.length > 0) {
+                uploadBatchFiles(files);
+            }
+        }, false);
+    }
+
+    async function getFilesFromDataTransfer(dataTransfer) {
+        const files = [];
+        if (dataTransfer.items && dataTransfer.items.length > 0 && dataTransfer.items[0].webkitGetAsEntry) {
+            async function traverseEntry(entry, path = '') {
+                if (entry.isFile) {
+                    const file = await new Promise(resolve => entry.file(resolve));
+                    if (path) {
+                        try {
+                            Object.defineProperty(file, 'webkitRelativePath', {
+                                value: path + '/' + file.name,
+                                writable: true
+                            });
+                        } catch {}
+                    }
+                    files.push(file);
+                } else if (entry.isDirectory) {
+                    const reader = entry.createReader();
+                    const entries = await new Promise(resolve => {
+                        const all = [];
+                        function readBatch() {
+                            reader.readEntries(results => {
+                                if (!results.length) {
+                                    resolve(all);
+                                } else {
+                                    all.push(...results);
+                                    readBatch();
+                                }
+                            });
+                        }
+                        readBatch();
+                    });
+                    const nextPath = path ? (path + '/' + entry.name) : entry.name;
+                    for (const child of entries) {
+                        await traverseEntry(child, nextPath);
+                    }
+                }
+            }
+            for (let i = 0; i < dataTransfer.items.length; i++) {
+                const entry = dataTransfer.items[i].webkitGetAsEntry();
+                if (entry) await traverseEntry(entry);
+            }
+        } else if (dataTransfer.files) {
+            files.push(...Array.from(dataTransfer.files));
+        }
+        return files;
+    }
+
+    // Admin change any user's password
+    let adminTargetUserId = null;
+    let adminTargetUsername = null;
+
+    function openAdminUserPasswordModal(id, username) {
+        adminTargetUserId = id;
+        adminTargetUsername = username;
+        document.getElementById('admin-pwd-target-user').textContent = '@' + username;
+        document.getElementById('admin-user-new-pwd').value = '';
+        document.getElementById('modal-admin-user-pwd').classList.add('active');
+    }
+
+    async function saveAdminUserPassword() {
+        const new_password = document.getElementById('admin-user-new-pwd').value;
+        if (!new_password || new_password.length < 4) {
+            return alert('A palavra-passe deve ter pelo menos 4 caracteres.');
+        }
+
+        try {
+            const res = await fetch(`/api/users/${adminTargetUserId}/password`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+                body: JSON.stringify({ new_password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message || 'Palavra-passe alterada com sucesso!');
+                closeModal('modal-admin-user-pwd');
+            } else {
+                alert(data.error || 'Erro ao alterar palavra-passe.');
+            }
+        } catch {
+            alert('Falha na ligação com o servidor.');
+        }
+    }
+
+    function openChangePasswordModal() {
+        document.getElementById('old-pass').value = '';
+        document.getElementById('new-pass').value = '';
+        document.getElementById('pwd-change-error').style.display = 'none';
+        document.getElementById('pwd-change-success').style.display = 'none';
+        document.getElementById('modal-change-password').classList.add('active');
+    }
+
+    async function saveNewPassword() {
+        const old_password = document.getElementById('old-pass').value;
+        const new_password = document.getElementById('new-pass').value;
+        const errDiv = document.getElementById('pwd-change-error');
+        const okDiv = document.getElementById('pwd-change-success');
+        errDiv.style.display = 'none';
+        okDiv.style.display = 'none';
+
+        if (!old_password || !new_password) {
+            errDiv.textContent = 'Preenche a palavra-passe atual e a nova.';
+            errDiv.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+                body: JSON.stringify({ old_password, new_password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                okDiv.textContent = 'Palavra-passe alterada com sucesso!';
+                okDiv.style.display = 'block';
+                document.getElementById('old-pass').value = '';
+                document.getElementById('new-pass').value = '';
+                setTimeout(() => closeModal('modal-change-password'), 1500);
+            } else {
+                errDiv.textContent = data.error || 'Erro ao alterar palavra-passe.';
+                errDiv.style.display = 'block';
+            }
+        } catch {
+            errDiv.textContent = 'Falha na ligação com o servidor.';
+            errDiv.style.display = 'block';
+        }
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    // Check saved session
+    const savedToken = localStorage.getItem('jmc_token');
+    if (savedToken) {
+        authToken = savedToken;
+        fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + authToken } })
+            .then(r => r.json())
+            .then(d => {
+                if (d.user) {
+                    currentUser = d.user;
+                    showApp();
+                } else {
+                    doLogout();
+                }
+            })
+            .catch(() => doLogout());
+    }
+</script>
+
+</body>
+</html>

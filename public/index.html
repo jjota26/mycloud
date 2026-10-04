@@ -726,6 +726,107 @@
     </div>
 </div>
 
+<!-- MODAL: RESOLVER FICHEIROS DUPLICADOS (COMPARAÇÃO VISUAL LADO A LADO) -->
+<div class="modal" id="modal-duplicate-resolver" style="z-index: 10005;">
+    <div class="modal-box" style="max-width: 720px; width: 95%; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+            <span style="display: flex; align-items: center; gap: 8px;">
+                ⚠️ <span id="dup-modal-header-title">Ficheiro Duplicado Encontrado</span>
+            </span>
+            <span class="modal-close" onclick="resolveDuplicateAction('keep_previous')">&times;</span>
+        </div>
+        
+        <p id="dup-modal-desc" style="color: #cbd5e1; font-size: 13px; margin-bottom: 16px; line-height: 1.5;">
+            Este ficheiro já existe nesta pasta no servidor. Compara ambas as versões abaixo e escolhe como queres proceder:
+        </p>
+
+        <!-- Comparação Lado a Lado -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 18px;">
+            
+            <!-- Caixa Esquerda: Versão Anterior (No Disco Z:) -->
+            <div style="background: #0f172a; border: 2px solid #334155; border-radius: 12px; padding: 14px; display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 12px; font-weight: bold; color: #94a3b8; text-transform: uppercase;">
+                        📁 Ficheiro Anterior (No Disco Z:)
+                    </span>
+                    <span class="status-badge" style="background: #334155; color: #cbd5e1; font-size: 11px;">Existente</span>
+                </div>
+                
+                <div id="dup-prev-preview-box" style="width: 100%; height: 200px; background: #020617; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; border: 1px solid #1e293b;">
+                    <!-- img, video ou icone -->
+                </div>
+
+                <div style="font-size: 13px; flex: 1;">
+                    <div id="dup-prev-name" style="font-weight: 600; color: #f8fafc; word-break: break-all; margin-bottom: 6px;"></div>
+                    <div style="display: flex; justify-content: space-between; color: #94a3b8; font-size: 12px; margin-bottom: 4px;">
+                        <span>Tamanho:</span>
+                        <strong id="dup-prev-size" style="color: #cbd5e1;"></strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: #94a3b8; font-size: 12px;">
+                        <span>Data Guardada:</span>
+                        <span id="dup-prev-date" style="color: #cbd5e1;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caixa Direita: Versão Atual (Novo Envio) -->
+            <div style="background: #0f172a; border: 2px solid #0284c7; border-radius: 12px; padding: 14px; display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 12px; font-weight: bold; color: #38bdf8; text-transform: uppercase;">
+                        🚀 Ficheiro Atual (Novo Envio)
+                    </span>
+                    <span class="status-badge status-active" style="font-size: 11px;">Novo</span>
+                </div>
+
+                <div id="dup-curr-preview-box" style="width: 100%; height: 200px; background: #020617; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; border: 1px solid #1e293b;">
+                    <!-- img, video ou icone -->
+                </div>
+
+                <div style="font-size: 13px; flex: 1;">
+                    <div id="dup-curr-name" style="font-weight: 600; color: #38bdf8; word-break: break-all; margin-bottom: 6px;"></div>
+                    <div style="display: flex; justify-content: space-between; color: #94a3b8; font-size: 12px; margin-bottom: 4px;">
+                        <span>Tamanho:</span>
+                        <strong id="dup-curr-size" style="color: #cbd5e1;"></strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: #94a3b8; font-size: 12px;">
+                        <span>Data do Ficheiro:</span>
+                        <span id="dup-curr-date" style="color: #cbd5e1;"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="dup-match-alert" style="background: rgba(2, 132, 199, 0.12); border: 1px solid #0284c7; border-radius: 8px; padding: 8px 12px; margin-bottom: 14px; font-size: 12px; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+            <span>ℹ️</span> <span id="dup-match-alert-text">Ambos os ficheiros têm o mesmo tamanho exato.</span>
+        </div>
+
+        <!-- Opção para aplicar a todos os duplicados subsequentes no envio em lote -->
+        <div id="dup-apply-all-container" style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" id="dup-apply-all-checkbox" style="cursor: pointer; width: 17px; height: 17px;">
+            <label for="dup-apply-all-checkbox" style="font-size: 13px; color: #e2e8f0; cursor: pointer; user-select: none;">
+                Aplicar esta mesma decisão a todos os outros ficheiros duplicados deste envio
+            </label>
+        </div>
+
+        <!-- Botões de Decisão -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+            <button class="btn btn-secondary btn-sm" onclick="resolveDuplicateAction('keep_previous')" style="flex: 1; min-width: 140px; padding: 8px 12px;" title="Descarta o novo envio e mantém o ficheiro anterior que já está no disco">
+                🛡️ Manter a Anterior
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="resolveDuplicateAction('delete_previous')" style="flex: 1; min-width: 140px; padding: 8px 12px;" title="Apaga a versão anterior do disco e grava a nova">
+                🗑️ Apagar a Anterior
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="resolveDuplicateAction('replace')" style="flex: 1; min-width: 140px; padding: 8px 12px;" title="Substitui o ficheiro anterior pelo atual">
+                🔄 Manter a Atual
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="resolveDuplicateAction('keep_both')" style="flex: 1; min-width: 130px; background: #1e3a5f; border-color: #0284c7; color: #38bdf8; padding: 8px 12px;" title="Guarda o novo ficheiro mantendo ambos com nomes diferentes">
+                📑 Manter Ambas
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL: GALERIA DE FOTOS FULLSCREEN COM SLIDE / DESLIZAR -->
 <div id="modal-gallery">
     <div class="gallery-header">
@@ -1286,9 +1387,10 @@
     function isPdfFile(filename) { return PDF_EXTS.includes(getFileExt(filename)); }
     function isTextFile(filename) { return TEXT_EXTS.includes(getFileExt(filename)); }
 
-    function getFileStreamUrl(filename, inline = true) {
+    function getFileStreamUrl(filename, inline = true, customPath = null) {
         const targetParam = inspectingUser ? `&target_user=${encodeURIComponent(inspectingUser.username)}` : '';
-        const pathParam = currentSubPath ? `&path=${encodeURIComponent(currentSubPath)}` : '';
+        const effectivePath = customPath !== null ? customPath : currentSubPath;
+        const pathParam = effectivePath ? `&path=${encodeURIComponent(effectivePath)}` : '';
         const ep = inline ? '/api/view' : '/api/download';
         return `${ep}?type=${currentFolderType}${pathParam}&filename=${encodeURIComponent(filename)}&token=${encodeURIComponent(authToken)}${targetParam}`;
     }
@@ -2126,8 +2228,151 @@
         }
     }
 
+    // ==========================================
+    // SISTEMA DE DETEÇÃO & RESOLUÇÃO DE DUPLICADOS (FOTOS, VÍDEOS E FICHEIROS)
+    // ==========================================
+    let batchDuplicateDecision = null;
+    let pendingDuplicateResolver = null;
+    let currentDupObjectUrl = null;
+
+    function promptDuplicateModal(file, existing, matchType, uploadPath) {
+        return new Promise((resolve) => {
+            pendingDuplicateResolver = resolve;
+
+            const modal = document.getElementById('modal-duplicate-resolver');
+            const headerTitle = document.getElementById('dup-modal-header-title');
+            const descEl = document.getElementById('dup-modal-desc');
+            const alertBox = document.getElementById('dup-match-alert');
+            const alertText = document.getElementById('dup-match-alert-text');
+            const applyAllCheckbox = document.getElementById('dup-apply-all-checkbox');
+            if (applyAllCheckbox) applyAllCheckbox.checked = false;
+
+            // Título e Descrição explicativa
+            if (matchType === 'same_name') {
+                headerTitle.textContent = 'Ficheiro Duplicado (Mesmo Nome Encontrado)';
+                descEl.innerHTML = `Já existe um ficheiro com o nome <b>${existing.name}</b> nesta pasta do servidor.<br>Compara as duas versões lado a lado e escolhe como queres proceder:`;
+            } else {
+                headerTitle.textContent = 'Ficheiro Duplicado (Conteúdo Idêntico)';
+                descEl.innerHTML = `Foi detetado um ficheiro idêntico já guardado como <b>${existing.name}</b> nesta pasta.<br>Compara as duas versões lado a lado e escolhe como queres proceder:`;
+            }
+
+            // Comparação de tamanhos e alertas
+            const currSizeFormatted = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            const currDateFormatted = file.lastModified ? new Date(file.lastModified).toLocaleString('pt-PT') : 'Hoje';
+            const prevDateFormatted = existing.modified ? new Date(existing.modified).toLocaleString('pt-PT') : '--';
+
+            if (existing.size === file.size) {
+                alertBox.style.display = 'flex';
+                alertText.textContent = `Atenção: Ambos os ficheiros têm exatamente o mesmo tamanho (${existing.size_formatted}). Trata-se da mesma foto/vídeo!`;
+            } else {
+                alertBox.style.display = 'flex';
+                alertText.textContent = `Ficheiros com tamanhos diferentes: O anterior tem ${existing.size_formatted} e o atual tem ${currSizeFormatted}.`;
+            }
+
+            // Metadados Ficheiro Anterior
+            document.getElementById('dup-prev-name').textContent = existing.name;
+            document.getElementById('dup-prev-size').textContent = existing.size_formatted;
+            document.getElementById('dup-prev-date').textContent = prevDateFormatted;
+
+            // Metadados Ficheiro Atual
+            document.getElementById('dup-curr-name').textContent = file.name;
+            document.getElementById('dup-curr-size').textContent = currSizeFormatted;
+            document.getElementById('dup-curr-date').textContent = currDateFormatted;
+
+            // Render das Pré-visualizações
+            const prevBox = document.getElementById('dup-prev-preview-box');
+            const currBox = document.getElementById('dup-curr-preview-box');
+            prevBox.innerHTML = '';
+            currBox.innerHTML = '';
+
+            const isImg = isImageFile(file.name) || isImageFile(existing.name);
+            const isVid = isVideoFile(file.name) || isVideoFile(existing.name);
+
+            // 1. Pré-visualização do Ficheiro Anterior (no servidor)
+            const prevUrl = getFileStreamUrl(existing.name, true, existing.path);
+            if (isImg) {
+                const img = document.createElement('img');
+                img.src = prevUrl;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '100%';
+                img.style.objectFit = 'contain';
+                prevBox.appendChild(img);
+            } else if (isVid) {
+                const vid = document.createElement('video');
+                vid.src = prevUrl;
+                vid.controls = true;
+                vid.playsInline = true;
+                vid.style.maxWidth = '100%';
+                vid.style.maxHeight = '100%';
+                prevBox.appendChild(vid);
+            } else {
+                prevBox.innerHTML = `<span style="font-size: 54px;">${getFileIcon(existing.name)}</span>`;
+            }
+
+            // 2. Pré-visualização do Ficheiro Atual (Local Blob)
+            if (currentDupObjectUrl) {
+                try { URL.revokeObjectURL(currentDupObjectUrl); } catch(e) {}
+                currentDupObjectUrl = null;
+            }
+            try {
+                currentDupObjectUrl = URL.createObjectURL(file);
+            } catch(e) {
+                currentDupObjectUrl = null;
+            }
+
+            if (isImg && currentDupObjectUrl) {
+                const img = document.createElement('img');
+                img.src = currentDupObjectUrl;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '100%';
+                img.style.objectFit = 'contain';
+                currBox.appendChild(img);
+            } else if (isVid && currentDupObjectUrl) {
+                const vid = document.createElement('video');
+                vid.src = currentDupObjectUrl;
+                vid.controls = true;
+                vid.playsInline = true;
+                vid.style.maxWidth = '100%';
+                vid.style.maxHeight = '100%';
+                currBox.appendChild(vid);
+            } else {
+                currBox.innerHTML = `<span style="font-size: 54px;">${getFileIcon(file.name)}</span>`;
+            }
+
+            modal.classList.add('active');
+        });
+    }
+
+    function resolveDuplicateAction(action) {
+        const checkbox = document.getElementById('dup-apply-all-checkbox');
+        if (checkbox && checkbox.checked) {
+            batchDuplicateDecision = action;
+        }
+
+        // Parar reprodução de vídeos se estiverem a tocar
+        document.querySelectorAll('#dup-prev-preview-box video, #dup-curr-preview-box video').forEach(v => {
+            try { v.pause(); } catch(e) {}
+        });
+
+        if (currentDupObjectUrl) {
+            try { URL.revokeObjectURL(currentDupObjectUrl); } catch(e) {}
+            currentDupObjectUrl = null;
+        }
+
+        closeModal('modal-duplicate-resolver');
+
+        if (pendingDuplicateResolver) {
+            const resolver = pendingDuplicateResolver;
+            pendingDuplicateResolver = null;
+            resolver(action);
+        }
+    }
+
     async function uploadBatchFiles(filesList, targetSubPath = '') {
         if (!filesList || filesList.length === 0) return;
+
+        // Resetar decisão em lote para esta nova subida de ficheiros
+        batchDuplicateDecision = null;
 
         const progressBox = document.getElementById('upload-progress-box');
         const statusText = document.getElementById('upload-status-text');
@@ -2139,13 +2384,14 @@
         const totalFiles = filesList.length;
         let totalUploadedBytes = 0;
         let successCount = 0;
+        let skippedCount = 0;
 
         const targetParam = inspectingUser ? `&target_user=${encodeURIComponent(inspectingUser.username)}` : '';
 
         for (let i = 0; i < totalFiles; i++) {
             const file = filesList[i];
             const percent = Math.round((i / totalFiles) * 100);
-            statusText.textContent = `A enviar ${i + 1} de ${totalFiles}: ${file.name}`;
+            statusText.textContent = `A processar ${i + 1} de ${totalFiles}: ${file.name}`;
             percentText.textContent = percent + '%';
             fillBar.style.width = percent + '%';
             detailText.textContent = `Ficheiro: ${(file.size / (1024 * 1024)).toFixed(2)} MB | Preservando qualidade original e metadados.`;
@@ -2166,9 +2412,53 @@
 
             const pathParam = uploadPath ? `&path=${encodeURIComponent(uploadPath)}` : '';
 
+            // DETEÇÃO DE DUPLICADOS (Fotos, vídeos ou qualquer outro ficheiro)
+            let duplicateDecision = null;
+            let existingInfo = null;
+
+            if (batchDuplicateDecision) {
+                duplicateDecision = batchDuplicateDecision;
+            } else {
+                try {
+                    const checkUrl = `/api/check-file?type=${currentFolderType}${pathParam}&filename=${encodeURIComponent(file.name)}&size=${file.size}${targetParam}`;
+                    const checkRes = await fetch(checkUrl, {
+                        headers: { 'Authorization': 'Bearer ' + authToken }
+                    });
+                    if (checkRes.ok) {
+                        const checkData = await checkRes.json();
+                        if (checkData.exists) {
+                            existingInfo = checkData.existing;
+                            duplicateDecision = await promptDuplicateModal(file, checkData.existing, checkData.match_type, uploadPath);
+                        }
+                    }
+                } catch (chkErr) {
+                    console.error('Erro ao verificar duplicados:', chkErr);
+                }
+            }
+
+            // Opção 1: "Manter a Anterior" -> Descarta o novo ficheiro e não faz upload
+            if (duplicateDecision === 'keep_previous') {
+                skippedCount++;
+                showToast(`🛡️ Mantida versão anterior de "${file.name}".`);
+                continue;
+            }
+
+            // Parâmetros especiais dependendo da escolha do utilizador
+            let extraUploadParams = '';
+            if (duplicateDecision === 'replace') {
+                extraUploadParams = '&replace=1';
+            } else if (duplicateDecision === 'delete_previous') {
+                extraUploadParams = '&replace=1';
+                if (existingInfo && existingInfo.name && existingInfo.name !== file.name) {
+                    extraUploadParams += `&delete_old_name=${encodeURIComponent(existingInfo.name)}`;
+                }
+            } else if (duplicateDecision === 'keep_both') {
+                extraUploadParams = '&rename=1';
+            }
+
             try {
                 const mtime = file.lastModified || Date.now();
-                const uploadUrl = `/api/upload?type=${currentFolderType}${pathParam}&filename=${encodeURIComponent(file.name)}&mtime=${mtime}${targetParam}`;
+                const uploadUrl = `/api/upload?type=${currentFolderType}${pathParam}&filename=${encodeURIComponent(file.name)}&mtime=${mtime}${targetParam}${extraUploadParams}`;
                 const res = await fetch(uploadUrl, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + authToken },
@@ -2180,8 +2470,15 @@
                     alert(`Erro ao enviar "${file.name}": ` + (errData.error || 'Limite ou erro no envio'));
                     break;
                 }
+                const uploadResult = await res.json().catch(() => ({}));
                 successCount++;
                 totalUploadedBytes += file.size;
+
+                if (duplicateDecision === 'keep_both' && uploadResult.filename) {
+                    showToast(`📑 Gravado como "${uploadResult.filename}" (mantidas ambas as versões).`);
+                } else if (duplicateDecision === 'delete_previous' || duplicateDecision === 'replace') {
+                    showToast(`🔄 Versão atualizada de "${file.name}" gravada com sucesso.`);
+                }
             } catch (e) {
                 alert(`Falha na ligação ao enviar "${file.name}".`);
                 break;
@@ -2190,8 +2487,12 @@
 
         fillBar.style.width = '100%';
         percentText.textContent = '100%';
-        statusText.textContent = `Envio Concluído! ${successCount} de ${totalFiles} ficheiro(s) gravado(s) com sucesso.`;
-        detailText.textContent = `Total enviado: ${(totalUploadedBytes / (1024 * 1024)).toFixed(2)} MB no Disco Z:\\.`;
+        let finishMsg = `Envio Concluído! ${successCount} de ${totalFiles} ficheiro(s) gravado(s).`;
+        if (skippedCount > 0) {
+            finishMsg += ` (${skippedCount} ficheiro(s) mantiveram a versão anterior).`;
+        }
+        statusText.textContent = finishMsg;
+        detailText.textContent = `Total gravado: ${(totalUploadedBytes / (1024 * 1024)).toFixed(2)} MB no Disco Z:\\.`;
 
         loadUserDrive();
 

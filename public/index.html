@@ -1010,9 +1010,10 @@
                         </span>
                     </td>
                     <td style="text-align: right; white-space: nowrap;">
-                        <button class="btn btn-secondary btn-sm" onclick="openAdminUserPasswordModal('${u.id}', '${u.username}')">🔑 Senha</button>
-                        <button class="btn btn-secondary btn-sm" onclick="openQuotaModal('${u.id}', '${u.username}', ${quotaGB})">✏️ Quota</button>
-                        <button class="btn btn-secondary btn-sm" onclick="toggleUserStatus('${u.id}')">${u.status === 'active' ? '⏸️' : '▶️'}</button>
+                        <button class="btn btn-secondary btn-sm" onclick="openAdminUserPasswordModal('${u.id}', '${u.username}')" title="Alterar Senha">🔑 Senha</button>
+                        <button class="btn btn-secondary btn-sm" onclick="openQuotaModal('${u.id}', '${u.username}', ${quotaGB})" title="Alterar Quota">✏️ Quota</button>
+                        <button class="btn btn-secondary btn-sm" onclick="toggleUserStatus('${u.id}')" title="${u.status === 'active' ? 'Suspender' : 'Ativar'}">${u.status === 'active' ? '⏸️' : '▶️'}</button>
+                        ${u.id !== currentUser.id ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}', '${u.username}')" title="Apagar Utilizador">🗑️</button>` : ''}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1066,6 +1067,28 @@
             loadAdminDashboard();
         } catch (e) {
             console.error(e);
+        }
+    }
+
+    async function deleteUser(id, username) {
+        if (!confirm(`Tens a certeza de que pretendes apagar o utilizador @${username}?\n\nAVISO: Todos os ficheiros, pastas e o website deste utilizador no disco Z: serão eliminados permanentemente!`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/users/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + authToken }
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alert(data.message || 'Utilizador apagado com sucesso.');
+                loadAdminDashboard();
+            } else {
+                alert(data.error || 'Erro ao apagar utilizador.');
+            }
+        } catch (e) {
+            alert('Falha na ligação ao servidor: ' + e.message);
         }
     }
 

@@ -378,6 +378,7 @@
             <div class="user-info">
                 <span id="user-name-display" style="font-weight: 600;"></span>
                 <span id="user-role-display" class="role-badge"></span>
+                <button class="btn btn-secondary btn-sm" onclick="openProfileModal()">👤 Perfil</button>
                 <button class="btn btn-secondary btn-sm" onclick="openChangePasswordModal()">🔑 Palavra-passe</button>
                 <button class="btn btn-secondary btn-sm" onclick="doLogout()">Sair</button>
             </div>
@@ -636,6 +637,31 @@
         <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
             <button class="btn btn-secondary" onclick="closeModal('modal-change-password')">Cancelar</button>
             <button class="btn btn-success" onclick="saveNewPassword()">Guardar Nova Senha</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: ALTERAR PERFIL DO UTILIZADOR -->
+<div class="modal" id="modal-profile">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>👤 O Meu Perfil</span>
+            <span class="modal-close" onclick="closeModal('modal-profile')">&times;</span>
+        </div>
+        <div id="profile-edit-error" style="color: #ef4444; font-size: 13px; margin-bottom: 12px; display: none; text-align: center;"></div>
+        <div id="profile-edit-success" style="color: #10b981; font-size: 13px; margin-bottom: 12px; display: none; text-align: center;"></div>
+        <div class="form-group">
+            <label>Nome de Apresentação / Exibição:</label>
+            <input type="text" id="profile-new-name" class="form-control" placeholder="ex: José ou José Silva">
+        </div>
+        <div class="form-group">
+            <label>Nome de Utilizador (Login):</label>
+            <input type="text" id="profile-new-username" class="form-control" placeholder="ex: jose ou jose26">
+            <small style="color: #94a3b8; font-size: 11px;">Mínimo 3 caracteres (letras, números, hífen ou sublinhado). Este é o nome que usas para entrar na tua conta.</small>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="closeModal('modal-profile')">Cancelar</button>
+            <button class="btn btn-success" onclick="saveProfileChanges()">Guardar Alterações</button>
         </div>
     </div>
 </div>
@@ -2330,6 +2356,56 @@
                 setTimeout(() => closeModal('modal-change-password'), 1500);
             } else {
                 errDiv.textContent = data.error || 'Erro ao alterar palavra-passe.';
+                errDiv.style.display = 'block';
+            }
+        } catch {
+            errDiv.textContent = 'Falha na ligação com o servidor.';
+            errDiv.style.display = 'block';
+        }
+    }
+
+    function openProfileModal() {
+        if (!currentUser) return;
+        document.getElementById('profile-new-name').value = currentUser.name || '';
+        document.getElementById('profile-new-username').value = currentUser.username || '';
+        document.getElementById('profile-edit-error').style.display = 'none';
+        document.getElementById('profile-edit-success').style.display = 'none';
+        document.getElementById('modal-profile').classList.add('active');
+    }
+
+    async function saveProfileChanges() {
+        const new_name = document.getElementById('profile-new-name').value.trim();
+        const new_username = document.getElementById('profile-new-username').value.trim();
+        const errDiv = document.getElementById('profile-edit-error');
+        const sucDiv = document.getElementById('profile-edit-success');
+        errDiv.style.display = 'none';
+        sucDiv.style.display = 'none';
+
+        if (!new_username || new_username.length < 3) {
+            errDiv.textContent = 'O nome de utilizador tem de ter pelo menos 3 caracteres.';
+            errDiv.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/update-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+                body: JSON.stringify({ new_name, new_username })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                sucDiv.textContent = 'Perfil atualizado com sucesso!';
+                sucDiv.style.display = 'block';
+                if (data.user) {
+                    currentUser.name = data.user.name;
+                    currentUser.username = data.user.username;
+                    const nameDisp = document.getElementById('user-name-display');
+                    if (nameDisp) nameDisp.textContent = data.user.name + ' (@' + data.user.username + ')';
+                }
+                setTimeout(() => closeModal('modal-profile'), 1500);
+            } else {
+                errDiv.textContent = data.error || 'Erro ao atualizar perfil.';
                 errDiv.style.display = 'block';
             }
         } catch {

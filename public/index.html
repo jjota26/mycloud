@@ -2,13 +2,16 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centauro - Nuvem &amp; Alojamento</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Centauro">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <link rel="apple-touch-icon" href="/icon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <title>Centauro - Nuvem &amp; Alojamento</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 20px; }
@@ -1168,21 +1171,39 @@
 
     // Login
     async function doLogin() {
-        const u = document.getElementById('login-user').value;
+        const u = document.getElementById('login-user').value.trim();
         const p = document.getElementById('login-pass').value;
         const errDiv = document.getElementById('auth-error');
+        const loginBtn = document.querySelector('#form-login button.btn-primary');
         errDiv.style.display = 'none';
+
+        if (!u || !p) {
+            errDiv.textContent = 'Preenche o nome de utilizador e a palavra-passe.';
+            errDiv.style.display = 'block';
+            return;
+        }
+
+        const originalBtnText = loginBtn ? loginBtn.textContent : 'Entrar no Servidor';
+        if (loginBtn) {
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'A ligar ao servidor...';
+        }
 
         try {
             const res = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: u, password: p })
+                body: JSON.stringify({ username: u, password: p }),
+                signal: AbortSignal.timeout(20000)
             });
             const data = await res.json();
             if (!res.ok) {
                 errDiv.textContent = data.error || 'Erro no login.';
                 errDiv.style.display = 'block';
+                if (loginBtn) {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = originalBtnText;
+                }
                 return;
             }
 
@@ -1190,10 +1211,19 @@
             currentUser = data.user;
             localStorage.setItem('jmc_token', authToken);
 
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.textContent = originalBtnText;
+            }
+
             showApp();
         } catch (e) {
-            errDiv.textContent = 'Não foi possível ligar ao servidor.';
+            errDiv.textContent = 'Não foi possível ligar ao servidor. A acordar servidor, tenta novamente em segundos.';
             errDiv.style.display = 'block';
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.textContent = originalBtnText;
+            }
         }
     }
 
@@ -3194,22 +3224,62 @@
         document.getElementById(id).classList.remove('active');
     }
 
-    // Check saved session
+    // Check saved session with retry & keepalive
     const savedToken = localStorage.getItem('jmc_token');
-    if (savedToken) {
+    let sessionRetryCount = 0;
+
+    async function checkSavedSession() {
+        if (!savedToken) return;
         authToken = savedToken;
-        fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + authToken } })
-            .then(r => r.json())
-            .then(d => {
-                if (d.user) {
-                    currentUser = d.user;
-                    showApp();
-                } else {
-                    doLogout();
+
+        try {
+            const res = await fetch('/api/me', {
+                headers: { 'Authorization': 'Bearer ' + authToken },
+                signal: AbortSignal.timeout(12000)
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                // Token inválido ou revogado pelo servidor
+                doLogout();
+                return;
+            }
+
+            const d = await res.json();
+            if (d.user) {
+                currentUser = d.user;
+                showApp();
+            } else {
+                doLogout();
+            }
+        } catch (err) {
+            // Servidor pode estar a acordar ou ligeiro atraso na rede - NÃO faz logout imediato!
+            sessionRetryCount++;
+            if (sessionRetryCount <= 3) {
+                const authErr = document.getElementById('auth-error');
+                if (authErr) {
+                    authErr.textContent = 'A ligar ao servidor... (tentativa ' + sessionRetryCount + '/3)';
+                    authErr.style.display = 'block';
                 }
-            })
-            .catch(() => doLogout());
+                setTimeout(checkSavedSession, 3000);
+            }
+        }
     }
+
+    if (savedToken) {
+        checkSavedSession();
+    }
+
+    // Keep-Alive da App: pinga o /health a cada 4 minutos enquanto a App estiver aberta
+    setInterval(() => {
+        fetch('/health').catch(() => {});
+    }, 4 * 60 * 1000);
+
+    // Ping imediato quando o utilizador volta à aplicação / separador
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            fetch('/health').catch(() => {});
+        }
+    });
 </script>
 
 </body>

@@ -53,11 +53,11 @@ const server = http.createServer((req, res) => {
     fs.stat(filePath, (err, stats) => {
         if (!err && stats.isFile()) {
             const ext = path.extname(filePath).toLowerCase();
-            const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+            const cacheControl = ext === '.html' ? 'no-cache, no-store, must-revalidate' : 'public, max-age=86400';
             res.writeHead(200, {
                 'Content-Type': contentType,
                 'Content-Length': stats.size,
-                'Cache-Control': 'public, max-age=3600'
+                'Cache-Control': cacheControl
             });
             fs.createReadStream(filePath).pipe(res);
         } else {
@@ -68,7 +68,10 @@ const server = http.createServer((req, res) => {
                     res.writeHead(404, { 'Content-Type': 'text/plain' });
                     res.end('Página não encontrada.');
                 } else {
-                    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                    res.writeHead(200, { 
+                        'Content-Type': 'text/html; charset=utf-8',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate'
+                    });
                     res.end(content);
                 }
             });

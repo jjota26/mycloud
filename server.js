@@ -4,6 +4,13 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 
+process.on('uncaughtException', (err) => {
+    console.error('[Render Uncaught Exception]', err && err.message ? err.message : err);
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('[Render Unhandled Rejection]', reason);
+});
+
 const PORT = process.env.PORT || 3000;
 // URL do teu servidor Centauro no PC (pode ser configurado no painel do Render nas "Environment Variables")
 const BACKEND_URL = (process.env.BACKEND_URL || 'http://centaurocloud.duckdns.org').replace(/\/+$/, '');
@@ -53,6 +60,7 @@ const server = http.createServer((req, res) => {
     fs.stat(filePath, (err, stats) => {
         if (!err && stats.isFile()) {
             const ext = path.extname(filePath).toLowerCase();
+            const contentType = MIME_TYPES[ext] || 'application/octet-stream';
             const cacheControl = ext === '.html' ? 'no-cache, no-store, must-revalidate' : 'public, max-age=86400';
             res.writeHead(200, {
                 'Content-Type': contentType,
